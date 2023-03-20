@@ -3,27 +3,6 @@
 #include "input.h"
 #include <string.h>
 #include "error.h"
-
-typedef struct item
-{
-    char* value;
-    struct keyspace* ks_ptr;
-}item;
-
-typedef struct keyspace
-{
-    bool busy;
-    char* key;
-    item* info;
-}keyspace;
-
-typedef struct table
-{
-    keyspace* ks;
-    int msize;
-    int csize;
-}table;
-
 table* create(int msize)
 {
 	table* new = (table*)malloc(sizeof(table));
