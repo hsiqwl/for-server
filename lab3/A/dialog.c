@@ -136,7 +136,7 @@ int d_read(table* tbl)
 	{
 		return 1;
 	}
-	FILE* fd = fopen(file,"rb");
+	FILE* fd = fopen(file,"r");
 	if(fd==NULL)
 	{
 		int msg = NO_FILE;

@@ -164,7 +164,7 @@ void read_from_file(FILE* fd,table* tbl)
 	fseek(fd,0,SEEK_END);
 	size = ftell(fd);
 	fseek(fd,0,SEEK_SET);
-	while(ftell(fd) < size)
+	while(ftell(fd) <= size)
 	{
 		char* string = get_str(fd);
 		char* key = strtok(string," ");
@@ -172,7 +172,9 @@ void read_from_file(FILE* fd,table* tbl)
 		if(key!=NULL && value!=NULL)
 		{
 			insert_by_key(key,value,tbl);
-		}
+            free(key);
+            free(value);
+        }
 		free(string);
 		fseek(fd,1,SEEK_CUR);
 	}

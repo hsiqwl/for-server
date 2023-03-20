@@ -20,7 +20,7 @@ int get_uint(int* value)
 	return 0;
 }
 
-char* get_str()
+char* get_str(FILE* fd)
 {
 	char* ptr = (char*)malloc(1);
 	char buf[81];
@@ -28,7 +28,7 @@ char* get_str()
 	*ptr = '\0';
 	do
 	{
-		n = scanf("%80[^\n]", buf);
+		n = fscanf(fd,"%80[^\n]", buf);
 		if(n<0)
 		{
 			free(ptr);
@@ -37,7 +37,7 @@ char* get_str()
 		}
 		if(n==0)
 		{
-			scanf("%*c");
+			fscanf(fd,"%*c");
 		}
 		else
 		{
