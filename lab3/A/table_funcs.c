@@ -141,19 +141,24 @@ int delete_by_range(char* start,char* end,table* tbl)
 void read_from_file(FILE* fd,table* tbl)
 {
 	int size;
-    fseek(fd, SEEK_END, SEEK_SET);
+    fseek(fd, 0, SEEK_END);
     size = ftell(fd);
     fseek(fd,0,SEEK_SET);
     while(!feof(fd))
     {
         char* string = malloc(size+1);
         fgets(string,size,fd);
+        if(strlen(string)!=0)
+        {
+            string[strlen(string) - 1] = 0;
+        }
         char* key = strtok(string," ");
         char* value = strtok(NULL," ");
-        insert_by_key(key,value,tbl);
+        if(key!=NULL && value!=NULL)
+        {
+            insert_by_key(key,value,tbl);
+        }
         free(string);
-        free(key);
-        free(value);
     }
 } 
 
