@@ -46,7 +46,7 @@ int d_add(table* tbl)
     if(msg == OK)
     {
         fseek(tbl->fp,0,SEEK_END);
-        fwrite(value,sizeof(char),strlen(value)+1,tbl->fp);
+        fwrite(value,sizeof(char),sizeof(value)/sizeof(char),tbl->fp);
     }
 	printf("%s\n",errmsg[msg+1]);
 	free(key);
@@ -192,13 +192,15 @@ void d_save(table* tbl)
 {
     reorganize(tbl);
     keyspace* ptr = tbl->ks;
-    fseek(tbl->fp,0,SEEK_SET);
-    fwrite(&(tbl->msize),sizeof(int),1,tbl->fp);
-    fwrite(&(tbl->csize),sizeof(int),1,tbl->fp);
+    FILE* f = tbl->fp;
+    fseek(f,0,SEEK_SET);
+    int n = fwrite(&(tbl->msize),sizeof(int),1,f);
+    printf("%d\n",n);
+    fwrite(&(tbl->csize),sizeof(int),1,f);
     for(int i = 0;i<tbl->csize;++i,++ptr)
     {
-        fwrite(ptr->key,sizeof(char),strlen(ptr->key)+1,tbl->fp);
-        fwrite(ptr->info->value,sizeof(char),strlen(ptr->info->value)+1,tbl->fp);
+        fwrite(ptr->key,sizeof(char),strlen(ptr->key)+1,f);
+        fwrite(ptr->info->value,sizeof(char),strlen(ptr->info->value)+1,f);
     }
     fclose(tbl->fp);
 }
