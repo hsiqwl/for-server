@@ -10,4 +10,5 @@ int d_show(table* tbl);
 int d_range(table* tbl);
 int d_reorganize(table* tbl);
 int d_read(table* tbl);
+table* d_load();
 #endif

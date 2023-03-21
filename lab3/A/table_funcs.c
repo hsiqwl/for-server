@@ -4,26 +4,6 @@
 #include <string.h>
 #include "error.h"
 
-typedef struct item
-{
-    char* value;
-    struct keyspace* ks_ptr;
-}item;
-
-typedef struct keyspace
-{
-    bool busy;
-    char* key;
-    item* info;
-}keyspace;
-
-typedef struct table
-{
-    keyspace* ks;
-    int msize;
-    int csize;
-}table;
-
 table* create(int msize)
 {
 	table* new = (table*)malloc(sizeof(table));
@@ -161,23 +141,20 @@ int delete_by_range(char* start,char* end,table* tbl)
 void read_from_file(FILE* fd,table* tbl)
 {
 	int size;
-	fseek(fd,0,SEEK_END);
-	size = ftell(fd);
-	fseek(fd,0,SEEK_SET);
-	while(ftell(fd) <= size)
-	{
-		char* string = get_str(fd);
-		char* key = strtok(string," ");
-		char* value = strtok(NULL," ");
-		if(key!=NULL && value!=NULL)
-		{
-			insert_by_key(key,value,tbl);
-            free(key);
-            free(value);
-        }
-		free(string);
-		fseek(fd,1,SEEK_CUR);
-	}
+    fseek(fd, SEEK_END, SEEK_SET);
+    size = ftell(fd);
+    fseek(fd,0,SEEK_SET);
+    while(!feof(fd))
+    {
+        char* string = malloc(size+1);
+        fgets(string,size,fd);
+        char* key = strtok(string," ");
+        char* value = strtok(NULL," ");
+        insert_by_key(key,value,tbl);
+        free(string);
+        free(key);
+        free(value);
+    }
 } 
 
 void delete_table(table** tbl)

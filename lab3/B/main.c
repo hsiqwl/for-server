@@ -12,7 +12,8 @@ int main()
 		printf("end\n");
 		return 0;
 	}
-	table* tbl = create(msize);
+	table* tbl = d_load();
+    return 0;
 	int command;
 	while((command = dialog(msgs,Nmsgs)))
 	{

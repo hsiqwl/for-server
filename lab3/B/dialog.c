@@ -150,3 +150,21 @@ int d_read(table* tbl)
 	free(file);
 	return 0;
 }
+
+table* d_load()
+{
+    printf("enter name of the file you want to read from:");
+    char* fname = readline("");
+    FILE* fp = fopen(fname,"r+b");
+    if(fp==NULL)
+    {
+        printf("ERROR\n");
+        return NULL;
+    }
+    int msize;
+    fread(&msize,sizeof(int),1,fp);
+    printf("%d\n",msize);
+    table* tbl = create(msize);
+    printf("%d\n",tbl->msize);
+    return tbl;
+}
