@@ -10,6 +10,6 @@ int delete_by_key(char* key,table* tbl);
 int delete_by_range(char* start,char* end,table* tbl);
 void print_table(const table* tbl);
 void reorganize(table* tbl);
-void read_from_file(FILE* fd,table* tbl);
+void read_from_file(FILE* fd,table* tbl,int position);
 void delete_table(table** tbl);
 #endif

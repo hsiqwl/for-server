@@ -11,4 +11,5 @@ int d_range(table* tbl);
 int d_reorganize(table* tbl);
 int d_read(table* tbl);
 table* d_load();
+void d_save(table* tbl);
 #endif

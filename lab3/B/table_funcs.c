@@ -19,7 +19,7 @@ item* search_by_key(table* tbl,char* key)
 	{
 		for(int i = 0;i<tbl->csize;++i,++ptr)
 		{
-			if(ptr->key!=NULL && strcmp(ptr->key,key)==0 && ptr->busy==1)
+			if(ptr->key!=NULL && strcmp(ptr->key,key)==0 && ptr->busy==0)
 			{
 				return ptr->info;
 			}
@@ -137,25 +137,29 @@ int delete_by_range(char* start,char* end,table* tbl)
 	return OK;
 }
 
-void read_from_file(FILE* fd,table* tbl)
+void read_from_file(FILE* fd,table* tbl,int position)
 {
-	int size;
-	fseek(fd,0,SEEK_END);
-	size = ftell(fd);
-	fseek(fd,0,SEEK_SET);
-	while(ftell(fd) < size)
-	{
-		char* string = get_str(fd);
-		char* key = strtok(string," ");
-		char* value = strtok(NULL," ");
-		if(key!=NULL && value!=NULL)
-		{
-			insert_by_key(key,value,tbl);
-		}
-		free(string);
-		fseek(fd,1,SEEK_CUR);
-	}
-} 
+    int size;
+    fseek(fd, 0, SEEK_END);
+    size = ftell(fd);
+    fseek(fd,position,SEEK_SET);
+    while(!feof(fd))
+    {
+        char* string = malloc(size+1);
+        fgets(string,size,fd);
+        if(strlen(string)!=0)
+        {
+            string[strlen(string) - 1] = 0;
+        }
+        char* key = strtok(string," ");
+        char* value = strtok(NULL," ");
+        if(key!=NULL && value!=NULL)
+        {
+            insert_by_key(key,value,tbl);
+        }
+        free(string);
+    }
+}
 
 void delete_table(table** tbl)
 {

@@ -1,11 +1,11 @@
 #ifndef TABLE_H
 #define TABLE_H
 #include <stdbool.h>
-
+#include <stdio.h>
 typedef struct item
 {
 	char* value;
-	struct keyspace* ks_ptr;
+    struct keyspace* ks_ptr;
 }item;
 
 typedef struct keyspace
@@ -20,6 +20,7 @@ typedef struct table
 	keyspace* ks;
 	int msize;
 	int csize;
+    FILE* fp;
 }table;
 
 #endif

@@ -43,6 +43,11 @@ int d_add(table* tbl)
 		return 1;
 	}
 	int msg = insert_by_key(key,value,tbl);
+    if(msg == OK)
+    {
+        fseek(tbl->fp,0,SEEK_END);
+        fwrite(value,sizeof(char),strlen(value)+1,tbl->fp);
+    }
 	printf("%s\n",errmsg[msg+1]);
 	free(key);
 	free(value);
@@ -144,7 +149,7 @@ int d_read(table* tbl)
 	}
 	else
 	{
-		read_from_file(fd,tbl);
+		read_from_file(fd,tbl,0);
 		fclose(fd);
 	}
 	free(file);
@@ -155,36 +160,45 @@ table* d_load()
 {
     printf("enter name of the file you want to read from:");
     char* fname = readline("");
-    FILE* fp = fopen(fname,"r+b");
+    int msize = 0, csize = 0;
+    FILE* fp = fopen(fname,"rb");
+    table* tbl = NULL;
     if(fp==NULL)
     {
-        printf("ERROR\n");
-        return NULL;
+        printf("looks like there is no such file, let's make one!\n");
+        printf("enter the size of table:");
+        if(get_uint(&msize))
+        {
+            return NULL;
+        }
+        tbl = create(msize);
+        fp = fopen(fname,"wb");
+        tbl->fp = fp;
     }
-    int msize;
-    fread(&msize,sizeof(int),1,fp);
-    printf("%d\n",msize);
-    table* tbl = create(msize);
-    printf("%d\n",tbl->msize);
+    else
+    {
+        fread(&msize,sizeof(int),1,fp);
+        fread(&csize,sizeof(int),1,fp);
+        int position = ftell(fp) + 1;
+        tbl = create(msize);
+        tbl->fp = fp;
+        read_from_file(fp,tbl,position);
+    }
+    free(fname);
     return tbl;
 }
 
-int d_save(table* tbl)
+void d_save(table* tbl)
 {
-    printf("enter name of the file you want to save to:");
-    char* fname = readline("");
-    FILE* fp = fopen(fname, "w+");
-    if(fp==NULL)
-    {
-        return NO_FILE;
-    }
     reorganize(tbl);
     keyspace* ptr = tbl->ks;
+    fseek(tbl->fp,0,SEEK_SET);
+    fwrite(&(tbl->msize),sizeof(int),1,tbl->fp);
+    fwrite(&(tbl->csize),sizeof(int),1,tbl->fp);
     for(int i = 0;i<tbl->csize;++i,++ptr)
     {
-        fprintf(fp,"key:%s -> value:%s\n",ptr->key,ptr->info->value);
+        fwrite(ptr->key,sizeof(char),strlen(ptr->key)+1,tbl->fp);
+        fwrite(ptr->info->value,sizeof(char),strlen(ptr->info->value)+1,tbl->fp);
     }
-    fclose(fp);
-    free(fname);
-    return OK;
+    fclose(tbl->fp);
 }
