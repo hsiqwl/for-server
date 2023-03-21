@@ -168,3 +168,23 @@ table* d_load()
     printf("%d\n",tbl->msize);
     return tbl;
 }
+
+int d_save(table* tbl)
+{
+    printf("enter name of the file you want to save to:");
+    char* fname = readline("");
+    FILE* fp = fopen(fname, "w+");
+    if(fp==NULL)
+    {
+        return NO_FILE;
+    }
+    reorganize(tbl);
+    keyspace* ptr = tbl->ks;
+    for(int i = 0;i<tbl->csize;++i,++ptr)
+    {
+        fprintf(fp,"key:%s -> value:%s\n",ptr->key,ptr->info->value);
+    }
+    fclose(fp);
+    free(fname);
+    return OK;
+}
