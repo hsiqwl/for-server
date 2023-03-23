@@ -12,16 +12,16 @@ table* create(int msize)
 	return new;
 }
 
-item* search_by_key(table* tbl,char* key)
+keyspace* search_by_key(table* tbl,char* key)
 {
 	keyspace* ptr = tbl->ks;
 	if(ptr!=NULL)
 	{
 		for(int i = 0;i<tbl->csize;++i,++ptr)
 		{
-			if(ptr->key!=NULL && strcmp(ptr->key,key)==0 && ptr->busy==0)
+			if(ptr->key!=NULL && strcmp(ptr->key,key)==0 && ptr->busy==1)
 			{
-				return ptr->info;
+                return ptr;
 			}
 		}
 	}
@@ -53,12 +53,16 @@ int insert_by_key(char* key,char* value,table* tbl)
 		}
 		else
 		{
-			(tbl->ks+tbl->csize)->busy = 1;
-			(tbl->ks+tbl->csize)->key = strdup(key);
-			(tbl->ks+tbl->csize)->info = (item*)malloc(sizeof(item));
-			(tbl->ks+tbl->csize)->info->value = strdup(value);
-			(tbl->ks + tbl->csize)->info->ks_ptr = tbl->ks + tbl->csize;
-			(tbl->csize)++;
+            (tbl->ks + tbl->csize)->key = strdup(key);
+            (tbl->ks + tbl->csize)->busy = 1;
+            fseek(tbl->ftbl,0,SEEK_END);
+            (tbl->ks + tbl->csize)->voffset = ftell(tbl->ftbl);
+            (tbl->ks + tbl->csize)->vlen = strlen(value);
+            fwrite(value,sizeof(char),(tbl->ks + tbl->csize)->vlen + 1 ,tbl->ftbl);
+            fseek(tbl->ftbl,0,SEEK_END);
+            (tbl->ks + tbl->csize)->koffset = ftell(tbl->ftbl);
+            (tbl->ks + tbl->csize)->klen = strlen(key);
+            tbl->csize++;
 			return OK; 
 		}
 	}
@@ -66,10 +70,11 @@ int insert_by_key(char* key,char* value,table* tbl)
 
 int delete_by_key(char* key, table* tbl)
 {
-	item* current_for_key = search_by_key(tbl,key);
+	keyspace* current_for_key = search_by_key(tbl,key);
 	if(current_for_key!=NULL)
 	{
-		current_for_key->ks_ptr->busy = 0;
+		current_for_key->klen = 0;
+        current_for_key->busy = 0;
 		return OK;
 	}
 	else
@@ -87,20 +92,13 @@ void reorganize(table* tbl)
 		if(ptr->busy==0 && ptr->key!=NULL)
 		{
 			free(ptr->key);
-			free(ptr->info->value);
-			free(ptr->info);
-			for(int j = i;j<tbl->msize - 1;++j,++ptr)
-			{
-				*(ptr) = *(ptr + 1);
-			}
-			(tbl->ks + tbl->msize - 1)->key = NULL;
-			(tbl->ks + tbl->msize - 1)->info = NULL;
-			count++; 
-			i--;
+            ptr->key = NULL;
+			keyspace buf = *ptr;
+            *ptr = *(tbl->ks + tbl->csize - 1);
+            *(tbl->ks + tbl->csize - 1) = buf;
+            tbl->csize--;
 		}
-		ptr = tbl->ks + i;
 	}
-	tbl->csize = tbl->csize - count;
 }
 
 void print_table(const table* tbl)
@@ -115,7 +113,13 @@ void print_table(const table* tbl)
 		printf("key:%s -> value:",ptr->key);
 		if(ptr->busy)
 		{
-			printf("%s\n",ptr->info->value);
+            fseek(tbl->ftbl,ptr->voffset,SEEK_SET);
+            char* value = (char*)malloc(ptr->vlen + 1);
+            fgets(value,ptr->vlen + 1,tbl->ftbl);
+            printf("%s\n", value);
+            printf("koff:%d\n",ptr->koffset);
+            printf("voff:%d\n",ptr->voffset);
+            free(value);
 		}
 		else
 		{
@@ -160,7 +164,30 @@ void read_from_file(FILE* fd,table* tbl,int position)
         free(string);
     }
 }
-
+void load(table* tbl)
+{
+    fseek(tbl->ftbl,sizeof(int),SEEK_SET);
+    int i = 0;
+    keyspace* ptr = tbl->ks;
+    while(i<tbl->msize)
+    {
+        fread(&ptr->klen,sizeof(int),1,tbl->ftbl);
+        fread(&ptr->koffset,sizeof(int),1,tbl->ftbl);
+        if(ptr->klen!=0)
+        {
+            int prev_pos = ftell(tbl->ftbl);
+            fseek(tbl->ftbl,ptr->koffset,SEEK_SET);
+            ptr->key = (char*)malloc(ptr->klen+1);
+            fread(ptr->key,sizeof(char), ptr->klen+1,tbl->ftbl);
+            fseek(tbl->ftbl,prev_pos,SEEK_SET);
+            fread(&ptr->voffset,sizeof(int),1,tbl->ftbl);
+            fread(&ptr->vlen,sizeof(int),1,tbl->ftbl);
+            ptr->busy = 1;
+            tbl->csize++;
+        }
+        i++;
+    }
+}
 void delete_table(table** tbl)
 {
 	keyspace* ptr = (*tbl)->ks;
@@ -168,11 +195,10 @@ void delete_table(table** tbl)
 	{
 		if(ptr->key!=NULL)
 		{
-			free(ptr->info->value);
-			free(ptr->info);
 			free(ptr->key);
 		}
 	}
 	free((*tbl)->ks);
 	free((*tbl));
 }
+
