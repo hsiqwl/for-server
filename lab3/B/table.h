@@ -2,17 +2,14 @@
 #define TABLE_H
 #include <stdbool.h>
 #include <stdio.h>
-typedef struct item
-{
-	char* value;
-    struct keyspace* ks_ptr;
-}item;
-
 typedef struct keyspace
 {
 	bool busy;
-	char* key;
-	item* info;
+    char* key;
+    int klen;
+	int koffset;
+    int voffset;
+    int vlen;
 }keyspace;
  
 typedef struct table
@@ -20,7 +17,8 @@ typedef struct table
 	keyspace* ks;
 	int msize;
 	int csize;
-    FILE* fp;
+    FILE* ftbl;
 }table;
 
 #endif
+
