@@ -21,6 +21,7 @@ int main()
 	}
 	printf("end\n");
     d_save(tbl);
+    fclose(tbl->ftbl);
 	delete_table(&tbl);
 	return 0;
 }
