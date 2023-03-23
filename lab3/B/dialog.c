@@ -43,11 +43,6 @@ int d_add(table* tbl)
 		return 1;
 	}
 	int msg = insert_by_key(key,value,tbl);
-    if(msg == OK)
-    {
-        fseek(tbl->fp,0,SEEK_END);
-        fwrite(value,sizeof(char),sizeof(value)/sizeof(char),tbl->fp);
-    }
 	printf("%s\n",errmsg[msg+1]);
 	free(key);
 	free(value);
@@ -76,7 +71,7 @@ int d_find(table* tbl)
 	{
 		return 1;
 	}
-	item* current_for_key = search_by_key(tbl,key);
+	keyspace* current_for_key = search_by_key(tbl,key);
 	free(key);
 	if(current_for_key==NULL)
 	{
@@ -87,7 +82,11 @@ int d_find(table* tbl)
 	{
 		int msg = OK;
 		printf("%s\n",errmsg[msg+1]);
-		printf("value is->%s\n", current_for_key->value);
+        char* value = (char*)malloc(current_for_key->vlen + 1);
+        fseek(tbl->ftbl,current_for_key->voffset,SEEK_SET);
+        fread(value,sizeof(char),current_for_key->vlen + 1,tbl->ftbl);
+		printf("value is->%s\n", value);
+        free(value);
 	}
 	return 0;
 }
@@ -158,12 +157,13 @@ int d_read(table* tbl)
 
 table* d_load()
 {
+    int msize = 0, csize = 0;
+    FILE* fkey = NULL;
+    table* tbl = NULL;
     printf("enter name of the file you want to read from:");
     char* fname = readline("");
-    int msize = 0, csize = 0;
-    FILE* fp = fopen(fname,"rb");
-    table* tbl = NULL;
-    if(fp==NULL)
+    FILE* ftbl = fopen(fname,"r+b");
+    if(ftbl==NULL)
     {
         printf("looks like there is no such file, let's make one!\n");
         printf("enter the size of table:");
@@ -171,20 +171,18 @@ table* d_load()
         {
             return NULL;
         }
+        ftbl = fopen(fname,"w+b");
         tbl = create(msize);
-        fp = fopen(fname,"wb");
-        tbl->fp = fp;
+        tbl->ftbl = ftbl;
+        d_save(tbl);
     }
     else
     {
-        fread(&msize,sizeof(int),1,fp);
-        fread(&csize,sizeof(int),1,fp);
-        int position = ftell(fp) + 1;
+        fread(&msize, sizeof(int), 1, ftbl);
         tbl = create(msize);
-        tbl->fp = fp;
-        read_from_file(fp,tbl,position);
+        tbl->ftbl = ftbl;
+        load(tbl);
     }
-    free(fname);
     return tbl;
 }
 
@@ -192,15 +190,13 @@ void d_save(table* tbl)
 {
     reorganize(tbl);
     keyspace* ptr = tbl->ks;
-    FILE* f = tbl->fp;
-    fseek(f,0,SEEK_SET);
-    int n = fwrite(&(tbl->msize),sizeof(int),1,f);
-    printf("%d\n",n);
-    fwrite(&(tbl->csize),sizeof(int),1,f);
-    for(int i = 0;i<tbl->csize;++i,++ptr)
+    fseek(tbl->ftbl,0,SEEK_SET);
+    fwrite(&tbl->msize,sizeof(int),1,tbl->ftbl);
+    for(int i = 0;i<tbl->msize;++i,++ptr)
     {
-        fwrite(ptr->key,sizeof(char),strlen(ptr->key)+1,f);
-        fwrite(ptr->info->value,sizeof(char),strlen(ptr->info->value)+1,f);
+        fwrite(&ptr->klen,sizeof(int),1,tbl->ftbl);
+        fwrite(&ptr->koffset,sizeof(int),1,tbl->ftbl);
+        fwrite(&ptr->voffset,sizeof(int),1,tbl->ftbl);
+        fwrite(&ptr->vlen,sizeof(int),1,tbl->ftbl);
     }
-    fclose(tbl->fp);
 }
