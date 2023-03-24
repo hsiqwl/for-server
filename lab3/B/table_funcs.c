@@ -55,13 +55,14 @@ int insert_by_key(char* key,char* value,table* tbl)
 		{
             (tbl->ks + tbl->csize)->key = strdup(key);
             (tbl->ks + tbl->csize)->busy = 1;
-            fseek(tbl->ftbl,0,SEEK_END);
+            printf("current offset:%d\n", ftell(tbl->ftbl));
             (tbl->ks + tbl->csize)->voffset = ftell(tbl->ftbl);
             (tbl->ks + tbl->csize)->vlen = strlen(value);
             fwrite(value,sizeof(char),(tbl->ks + tbl->csize)->vlen + 1 ,tbl->ftbl);
             fseek(tbl->ftbl,0,SEEK_END);
             (tbl->ks + tbl->csize)->koffset = ftell(tbl->ftbl);
             (tbl->ks + tbl->csize)->klen = strlen(key);
+            fwrite((tbl->ks + tbl->csize)->key,sizeof(char),(tbl->ks + tbl->csize)->klen + 1 ,tbl->ftbl);
             tbl->csize++;
 			return OK; 
 		}
@@ -171,8 +172,9 @@ void load(table* tbl)
     keyspace* ptr = tbl->ks;
     while(i<tbl->msize)
     {
-        fread(&ptr->klen,sizeof(int),1,tbl->ftbl);
-        fread(&ptr->koffset,sizeof(int),1,tbl->ftbl);
+        fread(&(ptr->klen),sizeof(int),1,tbl->ftbl);
+        perror("stream error:");
+        fread(&(ptr->koffset),sizeof(int),1,tbl->ftbl);
         if(ptr->klen!=0)
         {
             int prev_pos = ftell(tbl->ftbl);
@@ -186,6 +188,7 @@ void load(table* tbl)
             tbl->csize++;
         }
         i++;
+        ++ptr;
     }
 }
 void delete_table(table** tbl)

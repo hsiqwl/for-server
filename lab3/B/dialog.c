@@ -173,8 +173,8 @@ table* d_load()
         }
         ftbl = fopen(fname,"w+b");
         tbl = create(msize);
+        fseek(ftbl, sizeof(int) + msize*(4*sizeof(int)),SEEK_SET);
         tbl->ftbl = ftbl;
-        d_save(tbl);
     }
     else
     {
