@@ -158,7 +158,6 @@ int d_read(table* tbl)
 table* d_load()
 {
     int msize = 0, csize = 0;
-    FILE* fkey = NULL;
     table* tbl = NULL;
     printf("enter name of the file you want to read from:");
     char* fname = readline("");
@@ -183,6 +182,7 @@ table* d_load()
         tbl->ftbl = ftbl;
         load(tbl);
     }
+    free(fname);
     return tbl;
 }
 

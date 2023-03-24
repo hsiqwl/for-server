@@ -55,7 +55,6 @@ int insert_by_key(char* key,char* value,table* tbl)
 		{
             (tbl->ks + tbl->csize)->key = strdup(key);
             (tbl->ks + tbl->csize)->busy = 1;
-            printf("current offset:%d\n", ftell(tbl->ftbl));
             (tbl->ks + tbl->csize)->voffset = ftell(tbl->ftbl);
             (tbl->ks + tbl->csize)->vlen = strlen(value);
             fwrite(value,sizeof(char),(tbl->ks + tbl->csize)->vlen + 1 ,tbl->ftbl);
@@ -116,10 +115,8 @@ void print_table(const table* tbl)
 		{
             fseek(tbl->ftbl,ptr->voffset,SEEK_SET);
             char* value = (char*)malloc(ptr->vlen + 1);
-            fgets(value,ptr->vlen + 1,tbl->ftbl);
+            fread(value,sizeof(char),ptr->vlen+1,tbl->ftbl);
             printf("%s\n", value);
-            printf("koff:%d\n",ptr->koffset);
-            printf("voff:%d\n",ptr->voffset);
             free(value);
 		}
 		else
@@ -173,7 +170,6 @@ void load(table* tbl)
     while(i<tbl->msize)
     {
         fread(&(ptr->klen),sizeof(int),1,tbl->ftbl);
-        perror("stream error:");
         fread(&(ptr->koffset),sizeof(int),1,tbl->ftbl);
         if(ptr->klen!=0)
         {
@@ -186,6 +182,10 @@ void load(table* tbl)
             fread(&ptr->vlen,sizeof(int),1,tbl->ftbl);
             ptr->busy = 1;
             tbl->csize++;
+        }
+        else
+        {
+            fseek(tbl->ftbl,2*sizeof(int),SEEK_CUR);
         }
         i++;
         ++ptr;
