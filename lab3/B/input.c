@@ -6,7 +6,7 @@ int get_uint(int* value)
 	int n;
 	do
 	{
-		n = scanf("%u",value);
+		n = scanf("%d",value);
 		if(n==EOF)
 		{
 			return 1;
@@ -16,7 +16,7 @@ int get_uint(int* value)
 			while(getchar()!='\n');
 			printf("ERROR OCCURED,TRY AGAIN\n");
 		}
-	}while(n<=0);
+	}while(n<=0 || *value<=0);
 	return 0;
 }
 
