@@ -16,7 +16,7 @@ int get_uint(int* value)
 			while(getchar()!='\n');
 			printf("ERROR OCCURED,TRY AGAIN\n");
 		}
-	}while(n<=0 || *value<=0);
+	}while(n<=0 || *value<0);
 	return 0;
 }
 
