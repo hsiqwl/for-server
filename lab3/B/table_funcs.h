@@ -8,7 +8,7 @@ int table_full(table* tbl);
 int insert_by_key(char* key,char* value,table* tbl);
 int delete_by_key(char* key,table* tbl);
 int delete_by_range(char* start,char* end,table* tbl);
-void print_table(const table* tbl);
+void print_table(table* tbl);
 void reorganize(table* tbl);
 void read_from_file(FILE* fd,table* tbl,int position);
 void load(table* tbl);

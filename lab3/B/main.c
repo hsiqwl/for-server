@@ -20,6 +20,7 @@ int main()
 		}
 	}
 	printf("end\n");
+    tbl->ftbl = fopen(tbl->fname,"r+b");
     d_save(tbl);
     fclose(tbl->ftbl);
 	delete_table(&tbl);

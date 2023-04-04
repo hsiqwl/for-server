@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include "table_funcs.h"
-#include "input.h"
 #include <string.h>
 #include "error.h"
 table* create(int msize)
@@ -52,17 +51,21 @@ int insert_by_key(char* key,char* value,table* tbl)
 			return KEY_USED;
 		}
 		else
-		{
-            (tbl->ks + tbl->csize)->key = strdup(key);
-            (tbl->ks + tbl->csize)->busy = 1;
-            (tbl->ks + tbl->csize)->voffset = ftell(tbl->ftbl);
-            (tbl->ks + tbl->csize)->vlen = strlen(value);
-            fwrite(value,sizeof(char),(tbl->ks + tbl->csize)->vlen + 1 ,tbl->ftbl);
+        {
+            tbl->ftbl = fopen(tbl->fname,"r+b");
             fseek(tbl->ftbl,0,SEEK_END);
-            (tbl->ks + tbl->csize)->koffset = ftell(tbl->ftbl);
-            (tbl->ks + tbl->csize)->klen = strlen(key);
-            fwrite((tbl->ks + tbl->csize)->key,sizeof(char),(tbl->ks + tbl->csize)->klen + 1 ,tbl->ftbl);
+            keyspace* ptr = tbl->ks + tbl->csize;
+            ptr->key = strdup(key);
+            ptr->busy = 1;
+            ptr->voffset = ftell(tbl->ftbl);
+            ptr->vlen = strlen(value);
+            fwrite(value,sizeof(char),ptr->vlen + 1 ,tbl->ftbl);
+            fseek(tbl->ftbl,0,SEEK_END);
+            ptr->koffset = ftell(tbl->ftbl);
+            ptr->klen = strlen(key);
+            fwrite(ptr->key,sizeof(char),ptr->klen + 1 ,tbl->ftbl);
             tbl->csize++;
+            fclose(tbl->ftbl);
 			return OK; 
 		}
 	}
@@ -86,7 +89,6 @@ int delete_by_key(char* key, table* tbl)
 void reorganize(table* tbl)
 {
 	keyspace* ptr = tbl->ks;
-	int count = 0;
 	for(int i = 0;i<tbl->msize;++i,++ptr)
 	{
 		if(ptr->busy==0 && ptr->key!=NULL)
@@ -97,33 +99,40 @@ void reorganize(table* tbl)
             *ptr = *(tbl->ks + tbl->csize - 1);
             *(tbl->ks + tbl->csize - 1) = buf;
             tbl->csize--;
+            --i;
+            --ptr;
 		}
 	}
 }
 
-void print_table(const table* tbl)
+void print_table(table* tbl)
 {
 	if(tbl->csize == 0)
 	{
 		printf("table is empty\n");
 	}
-	keyspace* ptr = tbl->ks;
-	for(int i = 0;i<tbl->csize;++i,++ptr)
-	{
-		printf("key:%s -> value:",ptr->key);
-		if(ptr->busy)
-		{
-            fseek(tbl->ftbl,ptr->voffset,SEEK_SET);
-            char* value = (char*)malloc(ptr->vlen + 1);
-            fread(value,sizeof(char),ptr->vlen+1,tbl->ftbl);
-            printf("%s\n", value);
-            free(value);
-		}
-		else
-		{
-			printf("no value\n");
-		}
-	}
+    else
+    {
+        keyspace *ptr = tbl->ks;
+        tbl->ftbl = fopen(tbl->fname,"r+b");
+        for (int i = 0; i < tbl->csize; ++i, ++ptr) {
+            printf("key:%s -> value:", ptr->key);
+            if (ptr->busy)
+            {
+                fseek(tbl->ftbl, ptr->voffset, SEEK_SET);
+                char *value = (char *) malloc(ptr->vlen + 1);
+                fread(value, sizeof(char), ptr->vlen + 1, tbl->ftbl);
+                printf("%s\n", value);
+                perror("ERROR MSG:");
+                free(value);
+            }
+            else
+            {
+                printf("no value\n");
+            }
+        }
+        fclose(tbl->ftbl);
+    }
 }
 
 int delete_by_range(char* start,char* end,table* tbl)
@@ -202,6 +211,7 @@ void delete_table(table** tbl)
 		}
 	}
 	free((*tbl)->ks);
+    free((*tbl)->fname);
 	free((*tbl));
 }
 

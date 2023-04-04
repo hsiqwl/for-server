@@ -18,6 +18,7 @@ typedef struct table
 	int msize;
 	int csize;
     FILE* ftbl;
+    char* fname;
 }table;
 
 #endif

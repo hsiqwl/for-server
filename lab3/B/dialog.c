@@ -82,6 +82,7 @@ int d_find(table* tbl)
 	{
 		int msg = OK;
 		printf("%s\n",errmsg[msg+1]);
+        tbl->ftbl = fopen(tbl->fname,"r+b");
         char* value = (char*)malloc(current_for_key->vlen + 1);
         fseek(tbl->ftbl,current_for_key->voffset,SEEK_SET);
         fread(value,sizeof(char),current_for_key->vlen + 1,tbl->ftbl);
@@ -157,7 +158,7 @@ int d_read(table* tbl)
 
 table* d_load()
 {
-    int msize = 0, csize = 0;
+    int msize = 0;
     table* tbl = NULL;
     printf("enter name of the file you want to read from:");
     char* fname = readline("");
@@ -172,8 +173,8 @@ table* d_load()
         }
         ftbl = fopen(fname,"w+b");
         tbl = create(msize);
-        fseek(ftbl, sizeof(int) + msize*(4*sizeof(int)),SEEK_SET);
         tbl->ftbl = ftbl;
+        d_save(tbl);
     }
     else
     {
@@ -182,6 +183,8 @@ table* d_load()
         tbl->ftbl = ftbl;
         load(tbl);
     }
+    fclose(tbl->ftbl);
+    tbl->fname = strdup(fname);
     free(fname);
     return tbl;
 }
