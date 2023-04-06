@@ -21,14 +21,7 @@ int get_nod(int a, int b)
 
 int get_hash_easy(unsigned int key, int msize)
 {
-    unsigned int hash = key;
-    hash += ~(hash << 16);
-    hash ^=  (hash >>  5);
-    hash +=  (hash <<  3);
-    hash ^=  (hash >> 13);
-    hash += ~(hash <<  9);
-    hash ^=  (hash >> 17);
-    return (hash % msize);
+    return (key * 43 - 1) % msize;
 }
 
 int get_hash_primary(unsigned int key, int msize)

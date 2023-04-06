@@ -123,13 +123,19 @@ int delete(unsigned int key, int release, table* tbl)
 
 void print(const table* tbl)
 {
+    int empty = 1;
     keyspace* ptr = tbl->ks;
     for(int i = 0;i < tbl->msize;++i,++ptr)
     {
         if(ptr->busy)
         {
-            printf("key:%u -> value:%u\n",ptr->key,ptr->info->value);
+            empty = 0;
+            printf("key:%u -> value:%u release:%d\n",ptr->key,ptr->info->value, ptr->release);
         }
+    }
+    if(empty)
+    {
+        printf("table is empty\n");
     }
 }
 
@@ -139,7 +145,10 @@ void delete_table(table** tbl)
     int i = 0;
     while(i<(*tbl)->msize)
     {
-        free(ptr->info);
+        if(ptr->info != NULL)
+        {
+            free(ptr->info);
+        }
         ++i;
         ++ptr;
     }
