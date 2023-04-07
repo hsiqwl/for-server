@@ -1,6 +1,5 @@
 #include "hash.h"
 #include "consts.h"
-#include <math.h>
 #include <stdlib.h>
 
 int get_nod(int a, int b)
@@ -21,16 +20,17 @@ int get_nod(int a, int b)
 
 int get_hash_easy(unsigned int key, int msize)
 {
-    return (key * 43 - 1) % msize;
+    return key % msize;
 }
 
 int get_hash_primary(unsigned int key, int msize)
 {
     int ans;
-    do
+    ans = primary[key%primary_size];
+    if(get_nod(ans,msize)!=1)
     {
-        ans = primary[(rand() + key)%primary_size];
-    }while(get_nod(ans,msize) != 1);
+        ans-=1;
+    }
     return ans;
 }
 

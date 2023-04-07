@@ -20,7 +20,7 @@ table* find(unsigned int key, int release, table* tbl)
     int step = get_hash_primary(key,tbl->msize);
     table* new = create(1);
     int new_size = 0;
-    while((tbl->ks + index)->busy == 1 && visited < tbl->msize)
+    while((tbl->ks + index)->busy != 0 && visited < tbl->msize)
     {
        if(release!=0)
        {
@@ -63,26 +63,31 @@ int insert(unsigned int key, unsigned int value, table* tbl)
     int release = 0;
     int index = get_hash_easy(key,tbl->msize);
     int step = get_hash_primary(key,tbl->msize);
+    int empty_pos =  -1;
     while(visited < tbl->msize)
     {
-        if((tbl->ks+index)->busy==0)
+        if((tbl->ks+index)->busy!=1 && empty_pos == -1)
         {
-            if((tbl->ks + index)->info == NULL)
-            {
-                (tbl->ks + index)->info = (item*)malloc(sizeof(item));
-            }
-            (tbl->ks + index)->info->value = value;
-            (tbl->ks + index)->key = key;
-            (tbl->ks + index)->release = release + 1;
-            (tbl->ks + index)->busy = 1;
-            return OK;
+            empty_pos = index;
         }
-        else if ((tbl->ks + index)->key == key)
+        if ((tbl->ks + index)->key == key)
         {
             release = (tbl->ks + index)->release;
         }
         index = (index + step) % tbl->msize;
         visited++;
+    }
+    if(empty_pos!=-1)
+    {
+        (tbl->ks + empty_pos)->busy = 1;
+        (tbl->ks + empty_pos)->key = key;
+        (tbl->ks + empty_pos)->release = release + 1;
+        if((tbl->ks + empty_pos)->info == NULL)
+        {
+            (tbl->ks + empty_pos)->info = (item*)malloc(sizeof(item));
+        }
+        (tbl->ks + empty_pos)->info->value = value;
+        return OK;
     }
     return NO_SPACE;
 }
@@ -93,13 +98,13 @@ int delete(unsigned int key, int release, table* tbl)
     int visited = 0;
     int index = get_hash_easy(key,tbl->msize);
     int step = get_hash_primary(key,tbl->msize);
-    while((tbl->ks + index)->busy == 1 && visited < tbl->msize)
+    while((tbl->ks + index)->busy != 0 && visited < tbl->msize)
     {
         if(release!=0)
         {
             if((tbl->ks + index)->key == key && (tbl->ks + index)->release == release)
             {
-                (tbl->ks + index)->busy = 0;
+                (tbl->ks + index)->busy = -1;
                 return OK;
             }
         }
@@ -107,7 +112,7 @@ int delete(unsigned int key, int release, table* tbl)
         {
             if((tbl->ks + index)->key == key)
             {
-                (tbl->ks + index)->busy = 0;
+                (tbl->ks + index)->busy = -1;
                 flag = 1;
             }
         }
@@ -127,10 +132,14 @@ void print(const table* tbl)
     keyspace* ptr = tbl->ks;
     for(int i = 0;i < tbl->msize;++i,++ptr)
     {
-        if(ptr->busy)
+        if(ptr->busy == 1)
         {
             empty = 0;
             printf("key:%u -> value:%u release:%d\n",ptr->key,ptr->info->value, ptr->release);
+        }
+        else
+        {
+            printf("empty\n");
         }
     }
     if(empty)

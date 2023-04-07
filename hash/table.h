@@ -9,7 +9,7 @@ typedef struct Table
 
 typedef struct keyspace
 {
-    bool busy;
+    int busy;
     unsigned int key;
     unsigned int release;
     struct item* info;
