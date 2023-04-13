@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "hash.h"
-
 table* create(int msize)
 {
     table* new = (table*)malloc(sizeof(table));
@@ -18,8 +17,8 @@ table* find(unsigned int key, int release, table* tbl)
     int visited = 0;
     int index = get_hash_easy(key,tbl->msize);
     int step = get_hash_primary(key,tbl->msize);
-    table* new = create(1);
-    int new_size = 0;
+    table* new = create(tbl->msize);
+    int found_elems = 0;
     while((tbl->ks + index)->busy != 0 && visited < tbl->msize)
     {
        if(release!=0)
@@ -27,32 +26,28 @@ table* find(unsigned int key, int release, table* tbl)
            if((tbl->ks + index)->key == key && (tbl->ks + index)->release == release)
            {
                insert(key,(tbl->ks + index)->info->value,new);
-               new_size++;
+               found_elems = 1;
                break;
            }
        }
        else
        {
-           if ((tbl->ks + index)->key == key)
+           if ((tbl->ks + index)->key == key && (tbl->ks+index)->busy==1)
            {
-               new_size++;
-               new->ks = (keyspace*)realloc(new->ks,new_size * sizeof(keyspace));
-               (new->ks + new_size - 1)->busy = 0;
-               (new->ks + new_size - 1)->info = NULL;
+               found_elems = 1;
                insert(key,(tbl->ks + index)->info->value,new);
-               new->msize++;
            }
        }
        index = (index + step) % tbl->msize;
        visited++;
     }
-    if(new_size)
+    if(found_elems)
     {
-        new->msize = new_size;
         return new;
     }
     else
     {
+        delete_table(&new);
         return NULL;
     }
 }
@@ -69,8 +64,12 @@ int insert(unsigned int key, unsigned int value, table* tbl)
         if((tbl->ks+index)->busy!=1 && empty_pos == -1)
         {
             empty_pos = index;
+            if((tbl->ks+index)->busy == 0)
+            {
+                break;
+            }
         }
-        if ((tbl->ks + index)->key == key)
+        if ((tbl->ks+index)->busy!=0 && (tbl->ks + index)->key == key)
         {
             release = (tbl->ks + index)->release;
         }
@@ -102,15 +101,16 @@ int delete(unsigned int key, int release, table* tbl)
     {
         if(release!=0)
         {
-            if((tbl->ks + index)->key == key && (tbl->ks + index)->release == release)
+            if((tbl->ks + index)->key == key && (tbl->ks + index)->release == release && (tbl->ks+index)->busy==1)
             {
                 (tbl->ks + index)->busy = -1;
-                return OK;
+                flag = 1;
+                break;
             }
         }
         else
         {
-            if((tbl->ks + index)->key == key)
+            if((tbl->ks + index)->key == key && (tbl->ks+index)->busy==1)
             {
                 (tbl->ks + index)->busy = -1;
                 flag = 1;
