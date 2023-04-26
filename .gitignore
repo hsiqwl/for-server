@@ -4,3 +4,7 @@
 main
 build/
 cmake-build-debug/
+test
+vgcore.*
+*.dot
+*.dot.png
