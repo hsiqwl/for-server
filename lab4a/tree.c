@@ -2,7 +2,6 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "consts.h"
 Tree* search(Tree* root, char* key, int release)
 {
     Tree* ptr = root;
@@ -22,6 +21,45 @@ Tree* search(Tree* root, char* key, int release)
         }
     }
     return ptr;
+}
+
+Tree* special_search(Tree* root, char* key, int release)
+{
+    Tree* ptr = root;
+    if(root == NULL)
+    {
+        return NULL;
+    }
+    Tree* last_bigger = root;
+    while(ptr!=NULL && ptr->release!=release)
+    {
+        int cmp = strcmp(ptr->key, key);
+        if(cmp>0)
+        {
+            if(last_bigger==NULL || strcmp(last_bigger->key, ptr->key)>0)
+            {
+                last_bigger = ptr;
+            }
+            ptr = ptr->left;
+        }
+        else if (cmp<0)
+        {
+            ptr = ptr->right;
+        }
+        else
+        {
+            if(ptr->release!=release)
+            {
+                ptr = ptr->left;
+            }
+            else
+            {
+                last_bigger = ptr;
+                break;
+            }
+        }
+    }
+    return last_bigger;
 }
 
 Tree* get_min(Tree* root)
@@ -119,6 +157,7 @@ void insert(Tree** root, Tree* node)
                 node->release = ptr->release + 1;
                 ptr->left = node;
                 node->next = ptr->next;
+                ptr->next->prev = node;
                 node->prev = ptr;
                 ptr->next = node;
             }
@@ -150,11 +189,16 @@ void direct_travers(Tree* root, void (*visit_root)(Tree**),const char* max_str)
     Tree* ptr = root;
     while(ptr!=NULL)
     {
-        if(strcmp(ptr->key,max_str)>=0)
-        {
-            visit_root(&ptr);
-        }
+        Tree* curr_root = ptr;
         ptr = ptr->next;
+        if(*max_str==0)
+        {
+            visit_root(&curr_root);
+        }
+        else if(strcmp(curr_root->key, max_str)<=0)
+        {
+            visit_root(&curr_root);
+        }
     }
 }
 
@@ -189,7 +233,7 @@ Tree* find_parent(Tree* root, char* key, Tree** node, int release)
         {
             ptr = ptr->left;
         }
-        if(strcmp(key,ptr->key)<0)
+        else if(strcmp(key,ptr->key)<0)
         {
             ptr = ptr->left;
         }
@@ -277,6 +321,7 @@ int delete(Tree** root, char* key, int release)
             }
             else
             {
+                substitute->prev->left = NULL;
                 substitute->left = node->left;
                 substitute->right = node->right;
             }

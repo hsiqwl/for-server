@@ -94,6 +94,36 @@ int tree_search(Tree** root)
     }
 }
 
+int tree_special_search(Tree** root)
+{
+    char* key = readline("enter key:");
+    int release;
+    printf("enter release number:");
+    if(get_int(&release))
+    {
+        free(key);
+        printf("%s\n" , errmsg[BAD_INPUT]);
+        return 0;
+    }
+    else
+    {
+        Tree* result = special_search(*root, key, release);
+        free(key);
+        if(result == NULL)
+        {
+            printf("%s\n", errmsg[NO_KEY]);
+            return 0;
+        }
+        else
+        {
+            printf("%s -- %s -- %d\n", result->key,result->data,result->release);
+            printf("%s\n" , errmsg[OK]);
+            return 0;
+        }
+    }
+}
+
+
 int tree_delete(Tree** root)
 {
     char* key;

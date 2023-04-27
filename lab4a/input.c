@@ -13,7 +13,7 @@ int get_int(int* value)
         {
             return 1;
         }
-        if(n==0 || *value<=0)
+        if(n==0 || *value<0)
         {
             while(getchar()!='\n');
             printf("try again\n");

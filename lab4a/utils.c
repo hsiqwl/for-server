@@ -9,5 +9,13 @@ void print_root(Tree** root)
 
 void clear_root(Tree** root)
 {
+    if((*root)->key!=NULL)
+    {
+        free((*root)->key);
+    }
+    if((*root)->data!=NULL)
+    {
+        free((*root)->data);
+    }
     free(*root);
 }
