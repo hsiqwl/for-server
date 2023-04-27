@@ -2,11 +2,16 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-Tree* search(Tree* root, char* key)
+#include "consts.h"
+Tree* search(Tree* root, char* key, int release)
 {
     Tree* ptr = root;
-    while(ptr!=NULL && strcmp(key,ptr->key)!=0)
+    while(ptr!=NULL && (strcmp(key,ptr->key)!=0 || ptr->release != release))
     {
+        if(strcmp(key,ptr->key)==0 && release!=ptr->release)
+        {
+            ptr = ptr->left;
+        }
         if(strcmp(key,ptr->key)<0)
         {
             ptr = ptr->left;
@@ -43,6 +48,7 @@ void insert(Tree** root, Tree* node)
 {
     if(*root == NULL)
     {
+        node->release = 1;
         *root = node;
         return;
     }
@@ -80,6 +86,7 @@ void insert(Tree** root, Tree* node)
                 }
                 node->prev = prev;
                 prev->next = node;
+                node->release = 1;
                 break;
             }
         }
@@ -100,6 +107,7 @@ void insert(Tree** root, Tree* node)
                 }
                 node->prev = ptr;
                 ptr->next = node;
+                node->release = 1;
                 break;
             }
         }
@@ -108,6 +116,7 @@ void insert(Tree** root, Tree* node)
             if(parent == NULL)
             {
                 node->left = ptr->left;
+                node->release = ptr->release + 1;
                 ptr->left = node;
                 node->next = ptr->next;
                 node->prev = ptr;
@@ -125,6 +134,7 @@ void insert(Tree** root, Tree* node)
                     parent->right = node;
                     node->right = ptr;
                 }
+                node->release = ptr->release + 1;
                 ptr->prev->next = node;
                 node->prev = ptr->prev;
                 node->next = ptr;
@@ -135,12 +145,15 @@ void insert(Tree** root, Tree* node)
     }
 }
 
-void direct_travers(Tree* root, void (*visit_root)(Tree**))
+void direct_travers(Tree* root, void (*visit_root)(Tree**),const char* max_str)
 {
     Tree* ptr = root;
     while(ptr!=NULL)
     {
-        visit_root(&ptr);
+        if(strcmp(ptr->key,max_str)>=0)
+        {
+            visit_root(&ptr);
+        }
         ptr = ptr->next;
     }
 }
@@ -165,13 +178,17 @@ void make_graph(Tree* root, FILE** fd)
     fclose(*fd);
 }
 
-Tree* find_parent(Tree* root, char* key, Tree** node)
+Tree* find_parent(Tree* root, char* key, Tree** node, int release)
 {
     Tree* ptr = root;
     Tree* parent = NULL;
-    while(ptr!=NULL && strcmp(key,ptr->key)!=0)
+    while(ptr!=NULL && (strcmp(key,ptr->key)!=0 || ptr->release!=release))
     {
         parent = ptr;
+        if(strcmp(key,ptr->key)==0 && release!=ptr->release)
+        {
+            ptr = ptr->left;
+        }
         if(strcmp(key,ptr->key)<0)
         {
             ptr = ptr->left;
@@ -185,10 +202,10 @@ Tree* find_parent(Tree* root, char* key, Tree** node)
     return parent;
 }
 
-int delete(Tree** root, char* key)
+int delete(Tree** root, char* key, int release)
 {
     Tree* node;
-    Tree* parent = find_parent(*root, key, &node);
+    Tree* parent = find_parent(*root, key, &node, release);
     if(node == NULL)
     {
         return 1;

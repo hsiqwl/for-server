@@ -1,45 +1,20 @@
 #include <stdio.h>
-#include <readline/readline.h>
 #include "tree.h"
-#include "utils.h"
-#include <stdlib.h>
+#include "dialog.h"
 int main()
 {
-    int command, n;
+    int (*fptr[])(Tree**) = {NULL,tree_insert,tree_delete,tree_search,print,make_image};
+    int command;
     Tree* root = NULL;
-    do
+    while((command = dialog(msgs,Nmsgs)))
     {
-        n = scanf("%d",&command);
-        if(command == 1)
+        if(fptr[command](&root))
         {
-            char* key = readline("enter key:");
-            char* data = readline("enter value:");
-            Tree* node = (Tree*)malloc(sizeof(Tree));
-            node->key = strdup(key);
-            node->data = strdup(data);
-            node->left = NULL;
-            node->right = NULL;
-            node->next = NULL;
-            node->prev = NULL;
-            insert(&root, node);
-            free(key);
-            free(data);
+            break;
         }
-        if(command == 2)
-        {
-            direct_travers(root, print_root);
-        }
-        if(command == 4)
-        {
-            FILE* fd = fopen("tree.dot" , "w");
-            make_graph(root, &fd);
-            system("dot -Tpng -O tree.dot");
-        }
-        if(command == 3)
-        {
-            char* key = readline("enter key:");
-            delete(&root, key);
-            free(key);
-        }
-    }while(n!=EOF);
+    }
+    printf("end\n");
+    free_tree(&root);
+    return 0;
+
 }
