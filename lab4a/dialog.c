@@ -58,6 +58,12 @@ int tree_insert(Tree** root)
     return 0;
 }
 
+int show(Tree** root)
+{
+    show_tree(*root, 0);
+    return 0;
+}
+
 int tree_search(Tree** root)
 {
     char* key;
@@ -154,7 +160,7 @@ int tree_delete(Tree** root)
     }
 }
 
-int print(Tree** root)
+int traverse(Tree** root)
 {
     char* max_str;
     max_str = readline("enter max string to show or press ENTER to show all:");
