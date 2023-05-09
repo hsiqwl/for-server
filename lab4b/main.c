@@ -2,6 +2,7 @@
 #include "tree.h"
 #include <readline/readline.h>
 #include "utils.h"
+#include <stdlib.h>
 int main() {
     int command;
     int n;
@@ -19,6 +20,7 @@ int main() {
             char *value = readline("enter key");
             root = insert(root, key, value,NIL);
             root->color = BLACK;
+            free(value);
         }
         if(command==2)
         {
