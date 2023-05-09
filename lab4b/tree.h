@@ -36,4 +36,5 @@ tree* delete(tree* root, int key);
 void invert_traverse(tree* root, void (*visit_root)(tree**));
 void show_tree(tree* root, int lvl);
 void make_image(tree* root);
+void delete_tree(tree** root);
 #endif

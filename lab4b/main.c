@@ -36,5 +36,10 @@ int main() {
         {
             show_tree(root, 0);
         }
+        if(command==5)
+        {
+            make_image(root);
+        }
     }while(n!=EOF);
+    delete_tree(&root);
 }

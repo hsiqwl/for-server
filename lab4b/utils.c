@@ -1,6 +1,6 @@
 #include "utils.h"
 #include <stdio.h>
-
+#include <stdlib.h>
 void print_root(tree** root)
 {
     if(*root != NIL)
@@ -17,12 +17,18 @@ void graph(tree** root)
 
         if((*root)->right != NIL)
         {
-            fprintf(fd,"%d -- %d", (*root)->key, (*root)->right->key);
+            fprintf(fd,"%d -- %d\n", (*root)->key, (*root)->right->key);
         }
         if((*root)->left != NIL)
         {
-            fprintf(fd, "%d -- %d", (*root)->key, (*root)->left->key);
+            fprintf(fd, "%d -- %d\n", (*root)->key, (*root)->left->key);
         }
     }
     fclose(fd);
+}
+
+void delete_root(tree** root)
+{
+    free((*root)->value);
+    free(*root);
 }

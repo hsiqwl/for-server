@@ -193,10 +193,10 @@ tree* delete(tree* root, int key) {
 
 void show_tree(tree* root, int lvl) {
     int i = lvl;
-    if (root) {
+    if (root!=NIL) {
         show_tree(root->right, lvl + 1);
         while (i-- > 0) {
-            printf("  ");
+            printf(" ");
         }
         if (root != NIL) {
             printf("%d\n", root->key);
@@ -207,9 +207,11 @@ void show_tree(tree* root, int lvl) {
 
 void invert_traverse(tree* root, void (*visit_root)(tree**)) {
     if (root != NIL) {
-        invert_traverse(root->right, visit_root);
+        tree* right = root->right;
+        tree* left = root->left;
+        invert_traverse(right, visit_root);
         visit_root(&root);
-        invert_traverse(root->left, visit_root);
+        invert_traverse(left, visit_root);
     }
 }
 
@@ -222,4 +224,9 @@ void make_image(tree* root){
     fprintf(fd, "}");
     fclose(fd);
     system("dot -Tpng -O tree.dot");
+}
+
+void delete_tree(tree** root)
+{
+    invert_traverse(*root, delete_root);
 }

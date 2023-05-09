@@ -4,5 +4,6 @@
 
 void print_root(tree** root);
 void graph(tree** root);
+void delete_root(tree** root);
 #endif
 
