@@ -136,9 +136,14 @@ tree* delete_min(tree* node) {
 }
 
 tree* delete(tree* root, int key) {
+	if(root == NULL){
+		return NULL;
+	}
     if (key < root->key) {
-        if (!is_red(root->left) && !is_red(root->left->left)) {
-            root = lean_red_left(root);
+       if(root->left!=NULL){ 
+       		if (!is_red(root->left) && !is_red(root->left->left)) {
+            	root = lean_red_left(root);
+        	}
         }
         root->left = delete(root->left, key);
     } else {
@@ -150,12 +155,16 @@ tree* delete(tree* root, int key) {
             free(root);
             return NULL;
         }
-        if (!is_red(root->right) && !is_red(root->right->left)) {
-            root = lean_red_right(root);
+        if(root->right!=NULL){
+        	if (!is_red(root->right) && !is_red(root->right->left)) {
+            	root = lean_red_right(root);
+        	}
         }
         if (key == root->key) {
             tree *substitute = get_min(root->right);
-            root->value = substitute->value;
+            char* buf = strdup(substitute->value);
+            free(root->value);
+            root->value = buf;
             root->key = substitute->key;
             root->right = delete_min(root->right);
         } else {
