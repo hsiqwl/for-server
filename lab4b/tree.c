@@ -3,12 +3,9 @@
 #include <string.h>
 #include <stdio.h>
 #include "utils.h"
-tree NULLED = {0,NULL,NULL,NULL,NULL,BLACK};
-tree* NIL = &NULLED;
-
 tree* search(tree* root, int key) {
     tree *ptr = root;
-    while (ptr != NIL && ptr->key != key) {
+    while (ptr != NULL && ptr->key != key) {
         if (ptr->key > key) {
             ptr = ptr->left;
         } else {
@@ -20,7 +17,7 @@ tree* search(tree* root, int key) {
 
 tree* get_min(tree* root) {
     tree *ptr = root;
-    while (ptr->left != NIL) {
+    while (ptr->left != NULL) {
         ptr = ptr->left;
     }
     return ptr;
@@ -28,58 +25,45 @@ tree* get_min(tree* root) {
 
 tree* get_max(tree* root) {
     tree *ptr = root;
-    while (ptr->right != NIL) {
+    while (ptr->right != NULL) {
         ptr = ptr->right;
     }
     return ptr;
 }
 
-tree* new_node(int key, char* value, tree* parent) {
+tree* new_node(int key, char* value) {
     tree *new_node = (tree *) malloc(sizeof(tree));
     new_node->key = key;
     new_node->value = strdup(value);
-    new_node->left = NIL;
-    new_node->right = NIL;
+    new_node->left = NULL;
+    new_node->right = NULL;
     new_node->color = RED;
-    new_node->parent = parent;
     return new_node;
 }
 
 int is_red(tree* node) {
-    if (node->color == RED) {
-        return 1;
-    } else {
+    if (node == NULL || node->color == BLACK) {
         return 0;
+    } else {
+        return 1;
     }
 }
 
 tree* left_rotate(tree* node) {
-    tree *parent = node->parent;
     tree *switched = node->right;
     node->right = switched->left;
     switched->left = node;
     switched->color = node->color;
     node->color = RED;
-    node->parent = switched;
-    switched->parent = parent;
-    if (node->right != NIL) {
-        node->right->parent = node;
-    }
     return switched;
 }
 
 tree* right_rotate(tree* node) {
-    tree *parent = node->parent;
     tree *switched = node->left;
     node->left = switched->right;
     switched->right = node;
     switched->color = node->color;
     node->color = RED;
-    node->parent = switched;
-    switched->parent = parent;
-    if (node->left != NIL) {
-        node->left->parent = node;
-    }
     return switched;
 }
 
@@ -91,28 +75,26 @@ void change_colors(tree* node) {
 
 tree* rotations(tree* root)
 {
-    if (is_red(root->right) && !is_red(root->left)) {
+    if (is_red(root->right)) {
         root = left_rotate(root);
     }
     if (is_red(root->left) && is_red(root->left->left)) {
         root = right_rotate(root);
     }
-    return root;
-}
-
-tree* insert(tree* root, int key, char* value, tree* parent) {
-    if (root == NIL) {
-        return new_node(key, value, parent);
-    }
     if (is_red(root->left) && is_red(root->right)) {
         change_colors(root);
     }
+    return root;
+}
+
+tree* insert(tree* root, int key, char* value) {
+    if (root == NULL) {
+        return new_node(key, value);
+    }
     if (key > root->key) {
-        parent = root->right;
-        root->right = insert(root->right, key, value, parent);
+        root->right = insert(root->right, key, value);
     } else if (key < root->key) {
-        parent = root->left;
-        root->left = insert(root->left, key, value, parent);
+        root->left = insert(root->left, key, value);
     } else {
         char *buf = root->value;
         root->value = strdup(value);
@@ -141,14 +123,10 @@ tree* lean_red_right(tree* node) {
 }
 
 tree* delete_min(tree* node) {
-    if(node==NIL)
-    {
-        return NIL;
-    }
-    if (node->left == NIL) {
+    if (node->left == NULL){
         free(node->value);
         free(node);
-        return NIL;
+        return NULL;
     }
     if (!is_red(node->left) && !is_red(node->left->left)) {
         node = lean_red_left(node);
@@ -158,10 +136,6 @@ tree* delete_min(tree* node) {
 }
 
 tree* delete(tree* root, int key) {
-    if(root == NIL)
-    {
-        return NIL;
-    }
     if (key < root->key) {
         if (!is_red(root->left) && !is_red(root->left->left)) {
             root = lean_red_left(root);
@@ -171,10 +145,10 @@ tree* delete(tree* root, int key) {
         if (is_red(root->left)) {
             root = right_rotate(root);
         }
-        if (key == root->key && root->right == NIL) {
+        if (key == root->key && root->right == NULL) {
             free(root->value);
             free(root);
-            return NIL;
+            return NULL;
         }
         if (!is_red(root->right) && !is_red(root->right->left)) {
             root = lean_red_right(root);
@@ -193,12 +167,12 @@ tree* delete(tree* root, int key) {
 
 void show_tree(tree* root, int lvl) {
     int i = lvl;
-    if (root!=NIL) {
+    if (root!=NULL) {
         show_tree(root->right, lvl + 1);
         while (i-- > 0) {
             printf(" ");
         }
-        if (root != NIL) {
+        if (root != NULL) {
             printf("%d\n", root->key);
         }
         show_tree(root->left, lvl + 1);
@@ -206,7 +180,7 @@ void show_tree(tree* root, int lvl) {
 }
 
 void invert_traverse(tree* root, void (*visit_root)(tree**)) {
-    if (root != NIL) {
+    if (root != NULL) {
         tree* right = root->right;
         tree* left = root->left;
         invert_traverse(right, visit_root);
@@ -215,15 +189,14 @@ void invert_traverse(tree* root, void (*visit_root)(tree**)) {
     }
 }
 
-void make_image(tree* root){
-    FILE* fd = fopen("tree.dot", "w");
-    fprintf(fd, "strict graph {\n");
-    fclose(fd);
-    invert_traverse(root, graph);
-    fd = fopen("tree.dot", "a");
-    fprintf(fd, "}");
-    fclose(fd);
-    system("dot -Tpng -O tree.dot");
+tree* special_search(tree* root, int key) {
+    tree *max = get_max(root);
+    tree *min = get_min(root);
+    if (abs(max->key - key) > abs(min->key - key)) {
+        return max;
+    } else {
+        return min;
+    }
 }
 
 void delete_tree(tree** root)

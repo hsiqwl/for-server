@@ -1,47 +1,18 @@
 #include <stdio.h>
 #include "tree.h"
-#include <readline/readline.h>
-#include "utils.h"
-#include <stdlib.h>
+#include "dialog.h"
 int main() {
+    int (*fptr[])(tree**) = {NULL,tree_insert,tree_delete,tree_search, tree_special_search, traverse,make_image, show};
     int command;
-    int n;
-    tree* root = NIL;
-    do {
-        n = scanf("%d", &command);
-        if(n==EOF)
+    tree* root = NULL;
+    while((command = dialog(msgs,Nmsgs)))
+    {
+        if(fptr[command](&root))
         {
-            continue;
+            break;
         }
-        if(command==1) {
-            int key;
-            printf("enter key:");
-            scanf("%d", &key);
-            char *value = readline("enter key");
-            root = insert(root, key, value,NIL);
-            root->color = BLACK;
-            free(value);
-        }
-        if(command==2)
-        {
-            int key;
-            printf("enter key:");
-            scanf("%d", &key);
-            root = delete(root, key);
-            root->color = BLACK;
-        }
-        if(command == 3)
-        {
-            invert_traverse(root, print_root);
-        }
-        if(command==4)
-        {
-            show_tree(root, 0);
-        }
-        if(command==5)
-        {
-            make_image(root);
-        }
-    }while(n!=EOF);
+    }
+    printf("end\n");
     delete_tree(&root);
+    return 0;
 }

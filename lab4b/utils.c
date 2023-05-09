@@ -3,7 +3,7 @@
 #include <stdlib.h>
 void print_root(tree** root)
 {
-    if(*root != NIL)
+    if(*root != NULL)
     {
         printf("key - %d\n", (*root)->key);
     }
@@ -12,14 +12,14 @@ void print_root(tree** root)
 void graph(tree** root)
 {
     FILE* fd = fopen("tree.dot", "a");
-    if(*root != NIL)
+    if(*root != NULL)
     {
 
-        if((*root)->right != NIL)
+        if((*root)->right != NULL)
         {
             fprintf(fd,"%d -- %d\n", (*root)->key, (*root)->right->key);
         }
-        if((*root)->left != NIL)
+        if((*root)->left != NULL)
         {
             fprintf(fd, "%d -- %d\n", (*root)->key, (*root)->left->key);
         }
