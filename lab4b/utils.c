@@ -5,7 +5,7 @@ void print_root(tree** root)
 {
     if(*root != NULL)
     {
-        printf("key - %d\n", (*root)->key);
+        printf("key - %d, value - %s\n", (*root)->key, (*root)->value);
     }
 }
 
