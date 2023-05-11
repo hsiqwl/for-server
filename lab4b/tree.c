@@ -182,7 +182,7 @@ void show_tree(tree* root, int lvl) {
             printf(" ");
         }
         if (root != NULL) {
-            printf("%d\n", root->key);
+            printf("%d(%c)\n", root->key, root->color==BLACK ? 'b' : 'r');
         }
         show_tree(root->left, lvl + 1);
     }
