@@ -73,8 +73,7 @@ void change_colors(tree* node) {
     node->right->color = !node->right->color;
 }
 
-tree* rotations(tree* root)
-{
+tree* rotations(tree* root) {
     if (is_red(root->right)) {
         root = left_rotate(root);
     }

@@ -99,7 +99,9 @@ int tree_delete(tree** root) {
             return 0;
         }
         *root = delete(*root, key);
-        (*root)->color = BLACK;
+        if(*root!=NULL) {
+            (*root)->color = BLACK;
+        }
         printf("%s\n", errmsg[OK]);
     }
     return 0;
