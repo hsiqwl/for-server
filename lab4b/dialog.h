@@ -9,6 +9,8 @@ int tree_special_search(tree** root);
 int traverse(tree** root);
 int make_image(tree** root);
 int show(tree** root);
+int timing(tree** root);
+int tree_height(tree** root);
 int free_tree(tree** root);
 int dialog(const char* msgs[], int len);
 #endif

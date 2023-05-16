@@ -1,11 +1,14 @@
 #ifndef TREE_H
 #define TREE_H
 #include <stdio.h>
-typedef enum COLOR
+#include <stdbool.h>
+/*typedef enum COLOR
 {
     RED = 0,
     BLACK = 1
-}COLOR;
+}COLOR;*/
+#define BLACK true
+#define RED false
 
 typedef struct Tree
 {
@@ -13,7 +16,7 @@ typedef struct Tree
     char* value;
     struct Tree* right;
     struct Tree* left;
-    COLOR color;
+    bool color;
 }tree;
 
 tree* search(tree* root, int key);
@@ -28,7 +31,7 @@ tree* insert(tree* root, int key, char* value);
 tree* lean_red_left(tree* node);
 tree* lean_red_right(tree* node);
 tree* delete_min(tree* node);
-tree* delete(tree* root, int key);
+tree* delete_node(tree* root, int key);
 void invert_traverse(tree* root, void (*visit_root)(tree**));
 void show_tree(tree* root, int lvl);
 void delete_tree(tree** root);

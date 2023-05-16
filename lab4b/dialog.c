@@ -7,13 +7,15 @@
 #include "consts.h"
 #include "utils.h"
 #include <readline/readline.h>
+#include <time.h>
+#define SIZE 10000000
 int dialog(const char* msgs[], int len) {
-    char *err = "";
+    //char[24] err = "";
     int command;
     int n;
     do {
-        printf("%s\n", err);
-        err = "ERROR OCCURED,TRY AGAIN";
+      //  printf("%s\n", err);
+        //string = "ERROR OCCURED,TRY AGAIN";
         for (int i = 0; i < len; ++i) {
             printf("%s\n", msgs[i]);
         }
@@ -98,7 +100,7 @@ int tree_delete(tree** root) {
             printf("%s\n", errmsg[NO_KEY]);
             return 0;
         }
-        *root = delete(*root, key);
+        *root = delete_node(*root, key);
         if(*root!=NULL) {
             (*root)->color = BLACK;
         }
@@ -130,5 +132,69 @@ int make_image(tree** root){
     fprintf(fd, "}");
     fclose(fd);
     system("dot -Tpng -O tree.dot");
+    return 0;
+}
+
+int tree_height(tree** root)
+{
+    tree* ptr = *root;
+    int count = 0;
+    while(ptr->left!=NULL)
+    {
+        ptr = ptr->left;
+        count++;
+    }
+    printf("%d\n", count);
+    return 0;
+}
+
+int timing(tree** root) {
+    srand(time(NULL));
+    FILE *fd = fopen("input.txt", "r");
+    for (int i = 0; i < SIZE; i++) {
+        int key;
+        fscanf(fd, "%d", &key);
+        char *value = "";
+        *root = insert(*root, key, value);
+    }
+    fclose(fd);
+
+    double time = 0;
+    for (int i = 0; i < 1000; i++) {
+
+        int key = rand();
+        clock_t start = clock();
+        tree *result = search(*root, key);
+        clock_t end = clock();
+        time += (double) (end - start) / CLOCKS_PER_SEC;
+    }
+    fd = fopen("search.txt", "a+");
+    fprintf(fd, "%d %lf\n", SIZE, time);
+    fclose(fd);
+
+    time = 0;
+    for (int i = 0; i < 1000; i++) {
+        int key = rand();
+        char value[1] = "";
+        clock_t start = clock();
+        *root = insert(*root, key, value);
+        clock_t end = clock();
+        time += (double) (end - start) / CLOCKS_PER_SEC;
+    }
+    fd = fopen("insert.txt", "a+");
+    fprintf(fd, "%d %lf\n", SIZE, time);
+    fclose(fd);
+
+    time = 0;
+    for (int i = 0; i < 1000; i++) {
+        int key = rand();
+        clock_t start = clock();
+        *root = delete_node(*root, key);
+        clock_t end = clock();
+        time += (double) (end - start) / CLOCKS_PER_SEC;
+    }
+    fd = fopen("delete.txt", "a+");
+    fprintf(fd, "%d %lf\n", SIZE, time);
+    fclose(fd);
     return 0;
 }

@@ -134,7 +134,7 @@ tree* delete_min(tree* node) {
     return rotations(node);
 }
 
-tree* delete(tree* root, int key) {
+tree* delete_node(tree* root, int key) {
 	if(root == NULL){
 		return NULL;
 	}
@@ -144,7 +144,7 @@ tree* delete(tree* root, int key) {
             	root = lean_red_left(root);
         	}
         }
-        root->left = delete(root->left, key);
+        root->left = delete_node(root->left, key);
     } else {
         if (is_red(root->left)) {
             root = right_rotate(root);
@@ -167,7 +167,7 @@ tree* delete(tree* root, int key) {
             root->key = substitute->key;
             root->right = delete_min(root->right);
         } else {
-            root->right = delete(root->right, key);
+            root->right = delete_node(root->right, key);
         }
     }
     return rotations(root);
