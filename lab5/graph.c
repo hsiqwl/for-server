@@ -1,6 +1,7 @@
 #include "graph.h"
 #include <stdlib.h>
 #include <math.h>
+#include "utils.h"
 Graph* init() {
     Graph *new = (Graph*)malloc(sizeof(Graph));
     new->nodes = NULL;
@@ -33,18 +34,8 @@ int check_if_same_points(Point* first, Point* second) {
     }
 }
 
-Node* find_node_by_points(Graph* graph, Point* point) {
-    Node** ptr = graph->nodes;
-    for (int i = 0; i < graph->nodes_count; i++, ++ptr) {
-        if (check_if_same_points((*ptr)->point, point)) {
-            return *ptr;
-        }
-    }
-    return NULL;
-}
-
 int add_node(Graph* graph, Node* node) {
-    if (find_node_by_points(graph, node->point) != NULL) {
+    if (get_node_number(graph, node->point) != -1) {
         return 1;
     }
     graph->nodes_count += 1;
@@ -114,10 +105,43 @@ int delete_node(Graph* graph, Node* node){
 }
 
 int change_node(Graph* graph, Point* point, node_type new_type) {
-    Node *node = find_node_by_points(graph, point);
-    if (node == NULL) {
+    int node_index = get_node_number(graph, point);
+    if (node_index == -1) {
         return 1;
     }
-    node->type = new_type;
+    (*(graph->nodes + node_index))->type = new_type;
     return 0;
+}
+
+
+int* shortest_path_from_this_node(Graph* graph, Node* start)
+{
+    int* dist = (int*)malloc(graph->nodes_count*sizeof(int));
+    int* prev_shortest = (int*)malloc(graph->nodes_count*sizeof(int));
+    int* visited = (int*)calloc(graph->nodes_count,sizeof(int));
+    int number_of_visited = 0;
+    int curr_node = get_node_number(graph, start->point);
+    for(int i = 0;i<graph->nodes_count;i++) {
+        dist[i] = RAND_MAX;
+        prev_shortest[i] = curr_node;
+    }
+    dist[curr_node] = 0;
+    while(number_of_visited<graph->nodes_count)
+    {
+        Node* ptr = *(graph->nodes + curr_node);
+        ptr = ptr->next;
+        while(ptr!=NULL)
+        {
+            int next_node = get_node_number(graph, ptr->point);
+            if(visited[next_node]==0 && (dist[next_node] > dist[curr_node] + 1)) {
+                dist[next_node] = dist[curr_node] + 1;
+                prev_shortest[next_node] = curr_node;
+            }
+            ptr = ptr->next;
+        }
+        visited[curr_node] = 1;
+        number_of_visited++;
+        curr_node = get_index_of_min_unvisited(graph, *(graph->nodes + curr_node), dist, visited);
+    }
+    return prev_shortest;
 }

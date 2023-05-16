@@ -7,5 +7,5 @@ void insert_link(Graph* graph);
 void remove_link(Graph* graph);
 void remove_node(Graph* graph);
 void show_graph(Graph* graph);
-
+void find_shortest_path(Graph* graph);
 #endif

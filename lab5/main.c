@@ -3,7 +3,7 @@
 #include "dialog.h"
 int main() {
     Graph* graph = init();
-    void (*fptr[])(Graph*) = {NULL,insert_node, insert_link, remove_link, remove_node, show_graph};
+    void (*fptr[])(Graph*) = {NULL,insert_node, insert_link, remove_link, remove_node, show_graph, find_shortest_path};
     int command;
     printf("enter command:");
     scanf("%d", &command);

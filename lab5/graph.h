@@ -27,11 +27,11 @@ typedef struct Graph
 
 Graph* init();
 Node* new_node(Point* point, node_type type);
-Node* find_node_by_points(Graph* graph, Point* point);
 int add_link(Node* src, Node* dest);
 int check_if_same_points(Point* first, Point* second);
 int add_node(Graph* graph, Node* node);
 int delete_link(Node* src, Point* dest_point);
 int delete_node(Graph* graph, Node* node);
 int change_node(Graph* graph, Point* point, node_type new_type);
+int* shortest_path_from_this_node(Graph* graph, Node* start);
 #endif
