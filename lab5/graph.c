@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <math.h>
 #include "utils.h"
+#include "queue.h"
+
 Graph* init() {
     Graph *new = (Graph*)malloc(sizeof(Graph));
     new->nodes = NULL;
@@ -9,11 +11,12 @@ Graph* init() {
     return new;
 }
 
-Node* new_node(Point* point, node_type type) {
+Node* new_node(Point* point, node_type type, int node_index) {
     Node *new = (Node *) malloc(sizeof(Node));
     new->point = point;
     new->type = type;
     new->next = NULL;
+    new->node_index = node_index;
     return new;
 }
 
@@ -70,7 +73,7 @@ int delete_link(Node* src, Point* dest_point) {
     }
     if (ptr != NULL) {
         Node *next = ptr->next->next;
-        ptr->next->next = NULL;
+        clear_node(&(ptr->next));
         ptr->next = next;
         return 0;
     } else {
@@ -92,11 +95,12 @@ int delete_node(Graph* graph, Node* node){
         return 1;
     }else {
         ptr = graph->nodes + pos;
-        free((*ptr)->point);
-        free(*ptr);
+        clear_adj_list(&((*ptr)->next));
+        clear_node(ptr);
         *ptr = NULL;
         for (int i = pos; i < graph->nodes_count - 1; i++, ++ptr) {
             *ptr = *(ptr + 1);
+            (*ptr)->node_index -=1;
         }
         graph->nodes_count -= 1;
         graph->nodes = (Node **)realloc(graph->nodes, graph->nodes_count * sizeof(Node *));
@@ -116,24 +120,19 @@ int change_node(Graph* graph, Point* point, node_type new_type) {
 
 int* shortest_path_from_this_node(Graph* graph, Node* start)
 {
-    int* dist = (int*)malloc(graph->nodes_count*sizeof(int));
-    int* prev_shortest = (int*)malloc(graph->nodes_count*sizeof(int));
-    int* visited = (int*)calloc(graph->nodes_count,sizeof(int));
-    int number_of_visited = 0;
-    int curr_node = get_node_number(graph, start->point);
-    for(int i = 0;i<graph->nodes_count;i++) {
-        dist[i] = RAND_MAX;
-        prev_shortest[i] = curr_node;
-    }
+    int *dist, *visited, *prev_shortest;
+    init_for_dijkstra(&dist, &visited, &prev_shortest, graph->nodes_count);
+    int curr_node = start->node_index;
     dist[curr_node] = 0;
+    int number_of_visited = 0;
     while(number_of_visited<graph->nodes_count)
     {
         Node* ptr = *(graph->nodes + curr_node);
         ptr = ptr->next;
         while(ptr!=NULL)
         {
-            int next_node = get_node_number(graph, ptr->point);
-            if(visited[next_node]==0 && (dist[next_node] > dist[curr_node] + 1)) {
+            int next_node = ptr->node_index;
+            if(visited[next_node]==0 && (compare_dist(dist[next_node], dist[curr_node]))) {
                 dist[next_node] = dist[curr_node] + 1;
                 prev_shortest[next_node] = curr_node;
             }
@@ -141,7 +140,30 @@ int* shortest_path_from_this_node(Graph* graph, Node* start)
         }
         visited[curr_node] = 1;
         number_of_visited++;
-        curr_node = get_index_of_min_unvisited(graph, *(graph->nodes + curr_node), dist, visited);
+        curr_node = get_index_of_min_unvisited(dist, visited, graph->nodes_count);
     }
-    return prev_shortest;
+    return dist;
+}
+
+int breadth_first_search(Graph* graph, Node* start, Node* dest) {
+    int *visited = (int *) calloc(graph->nodes_count, sizeof(int));
+    queue *q = init_q();
+    push(q, start->node_index);
+    visited[start->node_index] = 1;
+    while (!is_empty(q)) {
+        int node_index = pop(q);
+        Node *ptr = *(graph->nodes + node_index);
+        ptr = ptr->next;
+        while (ptr != NULL) {
+            if (!visited[ptr->node_index]) {
+                push(q, ptr->node_index);
+                visited[ptr->node_index] = 1;
+                if (*(graph->nodes + ptr->node_index) == dest) {
+                    return 1;
+                }
+            }
+            ptr = ptr->next;
+        }
+    }
+    return 0;
 }

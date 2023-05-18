@@ -4,6 +4,10 @@
 
 Point* new_point(int x, int y);
 int get_node_number(Graph* graph, Point* node_point);
-int get_index_of_min_unvisited(Graph* graph, Node* node, const int* dist, const int* visited);
+int get_index_of_min_unvisited(const int* dist, const int* visited, int len);
 void print_node(Node* node);
+void init_for_dijkstra(int** dist, int** visited, int** prev_shortest, int len);
+int compare_dist(int first, int second);
+void clear_node(Node** node);
+void clear_adj_list(Node** node);
 #endif
