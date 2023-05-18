@@ -3,7 +3,7 @@
 #include <math.h>
 #include "utils.h"
 #include "queue.h"
-
+#include <stdio.h>
 Graph* init() {
     Graph *new = (Graph*)malloc(sizeof(Graph));
     new->nodes = NULL;
@@ -132,6 +132,7 @@ int* shortest_path_from_this_node(Graph* graph, Node* start)
         while(ptr!=NULL)
         {
             int next_node = ptr->node_index;
+            printf("next_node:%d\n", next_node);
             if(visited[next_node]==0 && (compare_dist(dist[next_node], dist[curr_node]))) {
                 dist[next_node] = dist[curr_node] + 1;
                 prev_shortest[next_node] = curr_node;
