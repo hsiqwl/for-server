@@ -36,4 +36,5 @@ int delete_node(Graph* graph, Node* node);
 int change_node(Graph* graph, Point* point, node_type new_type);
 int* shortest_path_from_this_node(Graph* graph, Node* start);
 int breadth_first_search(Graph* graph, Node* start,Node* dest);
+void clear_graph(Graph** graph);
 #endif

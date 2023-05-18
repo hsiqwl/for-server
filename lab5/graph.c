@@ -142,6 +142,8 @@ int* shortest_path_from_this_node(Graph* graph, Node* start)
         number_of_visited++;
         curr_node = get_index_of_min_unvisited(dist, visited, graph->nodes_count);
     }
+    free(visited);
+    free(prev_shortest);
     return dist;
 }
 
@@ -166,4 +168,17 @@ int breadth_first_search(Graph* graph, Node* start, Node* dest) {
         }
     }
     return 0;
+}
+
+
+void clear_graph(Graph** graph)
+{
+    Node** node_ptr = (*graph)->nodes;
+    for(int i = 0; i<(*graph)->nodes_count;i++)
+    {
+        clear_adj_list(&((*node_ptr)->next));
+        clear_node(node_ptr);
+
+    }
+    free((*graph)->nodes);
 }

@@ -15,5 +15,6 @@ int main() {
         printf("enter command:");
         scanf("%d", &command);
     }
+    clear_graph(&graph);
     return 0;
 }
