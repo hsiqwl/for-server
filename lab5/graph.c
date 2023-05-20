@@ -151,13 +151,11 @@ int breadth_first_search(Graph* graph, Node* start, Node* dest) {
     visited[start->node_index] = 1;
     while (!is_empty(q)) {
         int node_index = pop(q);
-        printf("node_index %d\n", node_index);
         Node *ptr = *(graph->nodes + node_index);
         ptr = ptr->next;
         while (ptr != NULL) {
             if (!visited[ptr->node_index]) {
                 push(q, ptr->node_index);
-                printf("node_index %d\n", ptr->node_index);
                 visited[ptr->node_index] = 1;
                 if (*(graph->nodes + ptr->node_index) == dest) {
                     return 1;
