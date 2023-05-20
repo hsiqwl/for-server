@@ -115,10 +115,18 @@ void find_shortest_path(Graph* graph) {
         if (dest_index == -1) {
             printf("no such node in graph\n");
         } else {
-            int *dist = shortest_path_from_this_node(graph, *(graph->nodes + start_index));
-            for(int i = 0;i<graph->nodes_count;i++)
+            int *pred = shortest_path_from_this_node(graph, *(graph->nodes + start_index));
+            if(pred[dest_index] == dest_index)
             {
-                printf("%d ", dist[i]);
+            	printf("there is no path between these two nodes\n");
+            }else{
+            	while(dest_index!=start_index){
+            		print_node(*(graph->nodes + dest_index));
+            		printf(" ");
+            		dest_index = pred[dest_index];
+            	}
+            	print_node(*(graph->nodes+start_index));
+            	printf("\n");
             }
         }
     }

@@ -83,16 +83,26 @@ int delete_node(Graph* graph, Node* node){
         delete_link(*ptr, node->node_index);
     }
     ptr = graph->nodes + node->node_index;
+    int pos = node->node_index;
     clear_adj_list(&((*ptr)->next));
     clear_node(ptr);
     *ptr = NULL;
-    for (int i = node->node_index; i < graph->nodes_count - 1; i++, ++ptr) {
+    for (int i = pos; i < graph->nodes_count - 1; i++, ++ptr) {
             *ptr = *(ptr + 1);
             (*ptr)->node_index -=1;
         }
-        graph->nodes_count -= 1;
-        graph->nodes = (Node **)realloc(graph->nodes, graph->nodes_count * sizeof(Node *));
-        return 0;
+    graph->nodes_count -= 1;
+    graph->nodes = (Node **)realloc(graph->nodes, graph->nodes_count * sizeof(Node *));
+    ptr = graph->nodes;
+    for(int i = 0;i < graph->nodes_count; ++i,++ptr)
+    {
+    	Node* next = (*ptr)->next;
+    	while(next!=NULL){
+    		next->node_index = get_node_number(graph, next->point);
+    		next = next->next;
+    	}
+    }   
+   	return 0;
 }
 
 int change_node(Graph* graph, Point* point, node_type new_type) {
@@ -141,11 +151,13 @@ int breadth_first_search(Graph* graph, Node* start, Node* dest) {
     visited[start->node_index] = 1;
     while (!is_empty(q)) {
         int node_index = pop(q);
+        printf("node_index %d\n", node_index);
         Node *ptr = *(graph->nodes + node_index);
         ptr = ptr->next;
         while (ptr != NULL) {
             if (!visited[ptr->node_index]) {
                 push(q, ptr->node_index);
+                printf("node_index %d\n", ptr->node_index);
                 visited[ptr->node_index] = 1;
                 if (*(graph->nodes + ptr->node_index) == dest) {
                     return 1;
