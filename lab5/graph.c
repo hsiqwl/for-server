@@ -30,11 +30,7 @@ int check_if_near(Point* src, Point* dest) {
 }
 
 int check_if_same_points(Point* first, Point* second) {
-    if (first->x == second->x && first->y == second->y) {
-        return 1;
-    } else {
-        return 0;
-    }
+    return (first->x == second->x && first->y == second->y);
 }
 
 int add_node(Graph* graph, Node* node) {
@@ -63,10 +59,10 @@ int add_link(Node* src, Node* dest) {
     return 0;
 }
 
-int delete_link(Node* src, Point* dest_point) {
+int delete_link(Node* src, int node_index) {
     Node *ptr = src;
     while (ptr != NULL) {
-        if (ptr->next!=NULL && check_if_same_points(ptr->next->point,dest_point)) {
+        if (ptr->next!=NULL && ptr->next->node_index == node_index) {
             break;
         }
         ptr = ptr->next;
@@ -83,29 +79,20 @@ int delete_link(Node* src, Point* dest_point) {
 
 int delete_node(Graph* graph, Node* node){
     Node** ptr = graph->nodes;
-    int pos = -1;
     for(int i = 0;i<graph->nodes_count;++i,++ptr) {
-        if(*ptr == node) {
-            pos = i;
-            continue;
-        }
-        delete_link(*ptr, node->point);
+        delete_link(*ptr, node->node_index);
     }
-    if(pos == -1) {
-        return 1;
-    }else {
-        ptr = graph->nodes + pos;
-        clear_adj_list(&((*ptr)->next));
-        clear_node(ptr);
-        *ptr = NULL;
-        for (int i = pos; i < graph->nodes_count - 1; i++, ++ptr) {
+    ptr = graph->nodes + node->node_index;
+    clear_adj_list(&((*ptr)->next));
+    clear_node(ptr);
+    *ptr = NULL;
+    for (int i = node->node_index; i < graph->nodes_count - 1; i++, ++ptr) {
             *ptr = *(ptr + 1);
             (*ptr)->node_index -=1;
         }
         graph->nodes_count -= 1;
         graph->nodes = (Node **)realloc(graph->nodes, graph->nodes_count * sizeof(Node *));
         return 0;
-    }
 }
 
 int change_node(Graph* graph, Point* point, node_type new_type) {
@@ -132,8 +119,7 @@ int* shortest_path_from_this_node(Graph* graph, Node* start)
         while(ptr!=NULL)
         {
             int next_node = ptr->node_index;
-            printf("next_node:%d\n", next_node);
-            if(visited[next_node]==0 && (compare_dist(dist[next_node], dist[curr_node]))) {
+            if(visited[next_node]==0 && dist[next_node] > dist[curr_node] + 1) {
                 dist[next_node] = dist[curr_node] + 1;
                 prev_shortest[next_node] = curr_node;
             }
@@ -144,8 +130,8 @@ int* shortest_path_from_this_node(Graph* graph, Node* start)
         curr_node = get_index_of_min_unvisited(dist, visited, graph->nodes_count);
     }
     free(visited);
-    free(prev_shortest);
-    return dist;
+    free(dist);
+    return prev_shortest;
 }
 
 int breadth_first_search(Graph* graph, Node* start, Node* dest) {
@@ -171,6 +157,27 @@ int breadth_first_search(Graph* graph, Node* start, Node* dest) {
     return 0;
 }
 
+int* ford_bellman(Graph* graph, Node* node) {
+    int *dist = (int *) malloc(sizeof(int) * graph->nodes_count);
+    for (int i = 0; i < graph->nodes_count; i++) {
+        dist[i] = RAND_MAX;
+    }
+    dist[node->node_index] = 0;
+    for (int i = 0; i < graph->nodes_count; i++) {
+        Node *ptr = *(graph->nodes);
+        for (int j = 0; j < graph->nodes_count; j++, ++ptr) {
+            int curr_node = ptr->node_index;
+            Node *next = ptr->next;
+            while (next != NULL) {
+                if (dist[next->node_index] < RAND_MAX && dist[next->node_index] > dist[curr_node] + 1) {
+                    dist[node->node_index] = dist[curr_node] + 1;
+                }
+                next = next->next;
+            }
+        }
+    }
+    return dist;
+}
 
 void clear_graph(Graph** graph)
 {

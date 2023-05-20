@@ -37,7 +37,7 @@ void insert_link(Graph* graph)
             printf("no such node in graph\n");
         } else {
             Node* dest = new_node(point, (*(graph->nodes + dest_index))->type, dest_index);
-            add_link(*(graph->nodes + src_index),dest);
+            add_link(graph->nodes[src_index],dest);
         }
     }
 }
@@ -60,19 +60,22 @@ void remove_link(Graph* graph)
         if(dest_index == -1) {
             printf("no such node in graph\n");
         }else {
-            delete_link(*(graph->nodes + src_index), (*(graph->nodes + dest_index))->point);
+            delete_link(graph->nodes[src_index], dest_index);
         }
     }
 }
 
-void remove_node(Graph* graph)
-{
+void remove_node(Graph* graph) {
     int x, y;
     printf("enter coordinates(x,y) of node:");
-    scanf("%d %d", &x,&y);
-    Point* point = new_point(x,y);
+    scanf("%d %d", &x, &y);
+    Point *point = new_point(x, y);
     int node_index = get_node_number(graph, point);
-    delete_node(graph,*(graph->nodes + node_index));
+    if (node_index == -1) {
+        printf("no such node in graph");
+    } else {
+        delete_node(graph, graph->nodes[node_index]);
+    }
 }
 
 void show_graph(Graph* graph) {
@@ -86,6 +89,7 @@ void show_graph(Graph* graph) {
         } else {
             printf("EXIT");
         }
+        printf(" %d ", node->node_index);
         while (node != NULL) {
             printf("(%d,%d)-", node->point->x, node->point->y);
             node = node->next;
@@ -144,5 +148,22 @@ void check_if_reachable(Graph* graph) {
                 printf("destination node is not reachable from starting node\n");
             }
         }
+    }
+}
+
+void bellman_ford(Graph* graph){
+    int x, y;
+    printf("enter coordinates(x,y) of starting node:");
+    scanf("%d %d", &x, &y);
+    Point *point = new_point(x, y);
+    int start_index = get_node_number(graph, point);
+    if (start_index == -1) {
+        printf("no such node in graph\n");
+    }else{
+        int* dist = ford_bellman(graph, *(graph->nodes + start_index));
+        for(int i = 0; i<graph->nodes_count;i++) {
+            printf("%d ", dist[i]);
+        }
+        free(dist);
     }
 }
