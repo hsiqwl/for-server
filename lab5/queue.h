@@ -17,5 +17,5 @@ queue* init_q();
 void push(queue* q, int node_index);
 int pop(queue* q);
 int is_empty(queue* q);
-
+void clear_q(queue** q);
 #endif

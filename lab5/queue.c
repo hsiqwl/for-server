@@ -49,3 +49,16 @@ int is_empty(queue* q) {
         return 0;
     }
 }
+
+void clear_q(queue** q){
+    if(*q == NULL){
+        return;
+    }
+    list* ptr = (*q)->head;
+    while(ptr!=NULL){
+        list* next_ptr = ptr->next;
+        free(ptr);
+        ptr = next_ptr;
+    }
+    free(*q);
+}

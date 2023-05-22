@@ -170,12 +170,14 @@ int breadth_first_search(Graph* graph, int start, int dest) {
                 push(q, ptr->node_index);
                 visited[ptr->node_index] = 1;
                 if (ptr->node_index == dest) {
+                    clear_q(&q);
                     return 1;
                 }
             }
             ptr = ptr->next;
         }
     }
+    clear_q(&q);
     return 0;
 }
 
