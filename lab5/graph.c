@@ -120,10 +120,14 @@ int* shortest_path_from_this_node(Graph* graph, int start_index) {
     if(start_index == -1) {
         return NULL;
     }
-    int *dist, *visited, *prev_shortest;
-    init_for_dijkstra(&dist, &visited, &prev_shortest, graph->nodes_count);
+    int *dist, *visited, *prev_shortest, *heap;
+    init_for_dijkstra(&dist, &visited, &prev_shortest,&heap, graph->nodes_count);
     int curr_node = start_index;
     dist[curr_node] = 0;
+    shift_up(heap, curr_node, dist);
+    int heap_size = graph->nodes_count;
+    curr_node = pop_min(heap, heap_size, dist);
+    heap_size--;
     int number_of_visited = 0;
     while (number_of_visited < graph->nodes_count) {
         adj_list* ptr = (*(graph->nodes + curr_node))->head;
@@ -132,15 +136,18 @@ int* shortest_path_from_this_node(Graph* graph, int start_index) {
             if (visited[next_node] == 0 && dist[next_node] > dist[curr_node] + 1) {
                 dist[next_node] = dist[curr_node] + 1;
                 prev_shortest[next_node] = curr_node;
+                shift_up(heap, next_node, dist);
             }
             ptr = ptr->next;
         }
         visited[curr_node] = 1;
         number_of_visited++;
-        curr_node = get_index_of_min_unvisited(dist, visited, graph->nodes_count);
+        curr_node = pop_min(heap, heap_size, dist);
+        heap_size--;
     }
     free(visited);
     free(dist);
+    free(heap);
     return prev_shortest;
 }
 
