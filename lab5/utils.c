@@ -13,7 +13,7 @@ Point* new_point(int x, int y)
 
 int get_node_number(Graph* graph, Point* node_point) {
     Node **ptr = graph->nodes;
-    int i = -1;
+    int i ;
     for (i = 0; i < graph->nodes_count; i++, ++ptr) {
         if (check_if_same_points((*ptr)->point, node_point)) {
             return i;

@@ -171,6 +171,7 @@ int breadth_first_search(Graph* graph, int start, int dest) {
                 visited[ptr->node_index] = 1;
                 if (ptr->node_index == dest) {
                     clear_q(&q);
+                    free(visited);
                     return 1;
                 }
             }
@@ -178,6 +179,7 @@ int breadth_first_search(Graph* graph, int start, int dest) {
         }
     }
     clear_q(&q);
+    free(visited);
     return 0;
 }
 
