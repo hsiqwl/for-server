@@ -121,6 +121,7 @@ void find_shortest_path(Graph* graph) {
             print_node(*(graph->nodes+start_index));
             printf("\n");
         }
+        free(pred);
     }
 }
 

@@ -72,22 +72,16 @@ void init_for_dijkstra(int** dist, int** visited, int** prev_shortest, int len)
     }
 }
 
-/*void clear_node(Node** node){
-    free((*node)->point);
-    free(*node);
-}
-
-void clear_adj_list(Node** node){
-    Node* ptr = *node;
-    while(ptr!=NULL) {
-        Node *prev_node = ptr;
-        ptr = ptr->next;
-        clear_node(&prev_node);
-        prev_node = NULL;
+void clear_adj_list(adj_list** head){
+    adj_list *ptr = *head;
+    while(ptr!=NULL){
+        adj_list* next = ptr->next;
+        free(ptr);
+        ptr = next;
     }
 }
 
-int check_entries(const Graph* graph){
+/*int check_entries(const Graph* graph){
     Node** ptr = graph->nodes;
     for(int i=0;i<graph->nodes_count;++i,++ptr){
         if((*ptr)->type == ENTRY && (*ptr)->next==NULL){

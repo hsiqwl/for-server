@@ -9,8 +9,7 @@ int get_node_number(Graph* graph, Point* node_point);
 int get_index_of_min_unvisited(const int* dist, const int* visited, int len);
 void print_node(Node* node);
 void init_for_dijkstra(int** dist, int** visited, int** prev_shortest, int len);
-void clear_node(Node** node);
-void clear_adj_list(Node** node);
+void clear_adj_list(adj_list** head);
 int check_entries(const Graph* graph);
 int check_exits(const Graph* graph);
 #endif
