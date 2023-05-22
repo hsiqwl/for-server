@@ -142,6 +142,12 @@ int* shortest_path_from_this_node(Graph* graph, int start_index) {
 }
 
 int breadth_first_search(Graph* graph, int start, int dest) {
+    if(start==-1 || dest==-1){
+        return 0;
+    }
+    if(start==dest){
+        return 1;
+    }
     int *visited = (int *)calloc(graph->nodes_count, sizeof(int));
     queue *q = init_q();
     push(q, start);
