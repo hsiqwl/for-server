@@ -2,6 +2,7 @@
 #include "utils.h"
 #include "graph.h"
 #include <stdio.h>
+#include <math.h>
 Point* new_point(int x, int y)
 {
     Point* new = (Point*)malloc(sizeof(Point));
@@ -19,6 +20,19 @@ int get_node_number(Graph* graph, Point* node_point) {
         }
     }
     return -1;
+}
+
+int check_if_near(Point* src, Point* dest) {
+    double dist = sqrt(abs(src->x - dest->x) * abs(src->x - dest->x) + abs(src->y - dest->y) * abs(src->y - dest->y));
+    if (dist != 1) {
+        return 0;
+    } else {
+        return 1;
+    }
+}
+
+int check_if_same_points(Point* first, Point* second) {
+    return (first->x == second->x && first->y == second->y);
 }
 
 int get_index_of_min_unvisited(const int* dist,const int* visited, int len) {
@@ -58,7 +72,7 @@ void init_for_dijkstra(int** dist, int** visited, int** prev_shortest, int len)
     }
 }
 
-void clear_node(Node** node){
+/*void clear_node(Node** node){
     free((*node)->point);
     free(*node);
 }
@@ -72,3 +86,39 @@ void clear_adj_list(Node** node){
         prev_node = NULL;
     }
 }
+
+int check_entries(const Graph* graph){
+    Node** ptr = graph->nodes;
+    for(int i=0;i<graph->nodes_count;++i,++ptr){
+        if((*ptr)->type == ENTRY && (*ptr)->next==NULL){
+            return 0;
+        }
+    }
+    return 1;
+}
+
+int check_exits(const Graph* graph){
+    Node** ptr = graph->nodes;
+    for(int i=0;i<graph->nodes_count;++i,++ptr) {
+        if((*ptr)->type != EXIT){
+            continue;
+        }else {
+            Node** new_ptr = graph->nodes;
+            int flag = 1;
+            for(int j = 0; j <graph->nodes_count;++j,++new_ptr){
+                Node* next_node = (*new_ptr)->next;
+                while(next_node!=NULL){
+                    if(next_node->node_index == i){
+                        flag = 0;
+                    }
+                    next_node = next_node->next;
+                }
+            }
+            if(flag){
+                return 1;
+            }else{
+                return 0;
+            }
+        }
+    }
+}*/

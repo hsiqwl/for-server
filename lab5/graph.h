@@ -13,12 +13,18 @@ typedef struct Point
     int y;
 }Point;
 
+typedef struct adj_list
+{
+    int node_index;
+    struct adj_list* next;
+}adj_list;
+
 typedef struct Node
 {
     Point* point;
     node_type type;
     int node_index;
-    struct Node* next;
+    adj_list* head;
 }Node;
 
 typedef struct Graph
@@ -29,14 +35,14 @@ typedef struct Graph
 
 Graph* init();
 Node* new_node(Point* point, node_type type, int node_index);
-int add_link(Node* src, Node* dest);
+int add_link(Graph* graph ,int from, int to);
 int check_if_same_points(Point* first, Point* second);
 int add_node(Graph* graph, Node* node);
-int delete_link(Node* src, int node_index);
-int delete_node(Graph* graph, Node* node);
-int change_node(Graph* graph, Point* point, node_type new_type);
-int* shortest_path_from_this_node(Graph* graph, Node* start);
-int breadth_first_search(Graph* graph, Node* start,Node* dest);
-void clear_graph(Graph** graph);
-int* ford_bellman(Graph* graph, Node* node);
+int delete_link(Graph* graph, int from, int to);
+int delete_node(Graph* graph, int node_index);
+int change_nod_type(Graph* graph, int node_index, node_type new_type);
+int* shortest_path_from_this_node(Graph* graph, int start_index);
+int breadth_first_search(Graph* graph, int start,int dest);
+//Graph* skeleton(const Graph* graph);
+//void clear_graph(Graph** graph);
 #endif

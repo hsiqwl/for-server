@@ -15,7 +15,11 @@ void insert_node(Graph* graph)
     int node_type;
     scanf("%d",&node_type);
     Node* new = new_node(point, node_type, graph->nodes_count);
-    add_node(graph, new);
+    if(add_node(graph, new)){
+        printf("there is such node already\n");
+    }else{
+        printf("ok\n");
+    }
 }
 
 void insert_link(Graph* graph)
@@ -25,20 +29,15 @@ void insert_link(Graph* graph)
     scanf("%d %d", &x,&y);
     Point* point = new_point(x,y);
     int src_index = get_node_number(graph, point);
-    if(src_index == -1) {
-        printf("no such node in graph\n");
-    } else {
-        printf("enter coordinates(x,y) of second node:");
-        scanf("%d %d", &x, &y);
-        point->x = x;
-        point->y = y;
-        int dest_index = get_node_number(graph, point);
-        if (dest_index == -1) {
-            printf("no such node in graph\n");
-        } else {
-            Node* dest = new_node(point, (*(graph->nodes + dest_index))->type, dest_index);
-            add_link(graph->nodes[src_index],dest);
-        }
+    printf("enter coordinates(x,y) of second node:");
+    scanf("%d %d", &x, &y);
+    point->x = x;
+    point->y = y;
+    int dest_index = get_node_number(graph, point);
+    if(add_link(graph, src_index, dest_index)){
+        printf("cannot add a link\n");
+    }else{
+        printf("ok\n");
     }
 }
 
@@ -49,19 +48,15 @@ void remove_link(Graph* graph)
     scanf("%d %d", &x,&y);
     Point* point = new_point(x,y);
     int src_index = get_node_number(graph, point);
-    if(src_index == -1) {
-        printf("no such node in graph\n");
-    }else {
-        printf("enter coordinates(x,y) of second node:");
-        scanf("%d %d", &x, &y);
-        point->x = x;
-        point->y = y;
-        int dest_index = get_node_number(graph, point);
-        if(dest_index == -1) {
-            printf("no such node in graph\n");
-        }else {
-            delete_link(graph->nodes[src_index], dest_index);
-        }
+    printf("enter coordinates(x,y) of second node:");
+    scanf("%d %d", &x, &y);
+    point->x = x;
+    point->y = y;
+    int dest_index = get_node_number(graph, point);
+    if(delete_link(graph, src_index, dest_index)){
+        printf("no such node or no link between nodes");
+    }else{
+        printf("ok\n");
     }
 }
 
@@ -71,27 +66,28 @@ void remove_node(Graph* graph) {
     scanf("%d %d", &x, &y);
     Point *point = new_point(x, y);
     int node_index = get_node_number(graph, point);
-    if (node_index == -1) {
-        printf("no such node in graph");
-    } else {
-        delete_node(graph, graph->nodes[node_index]);
+    if(delete_node(graph, node_index)){
+       printf("no such node\n");
+    }else{
+        printf("ok\n");
     }
 }
 
 void show_graph(Graph* graph) {
     Node **ptr = graph->nodes;
     for (int i = 0; i < graph->nodes_count; i++, ++ptr) {
-        Node *node = *ptr;
-        if (node->type == BASIC) {
+        adj_list *node = (*ptr)->head;
+        if ((*ptr)->type == BASIC) {
             printf("BASIC");
-        } else if (node->type == ENTRY) {
+        } else if ((*ptr)->type == ENTRY) {
             printf("ENTRY");
         } else {
             printf("EXIT");
         }
-        printf(" %d ", node->node_index);
+        printf(" %d ", (*ptr)->node_index);
+        printf("(%d,%d)-", (*ptr)->point->x, (*ptr)->point->y);
         while (node != NULL) {
-            printf("(%d,%d)-", node->point->x, node->point->y);
+            printf("(%d,%d)-", (*(graph->nodes + node->node_index))->point->x, (*(graph->nodes + node->node_index))->point->y);
             node = node->next;
         }
         printf("\n");
@@ -104,30 +100,26 @@ void find_shortest_path(Graph* graph) {
     scanf("%d %d", &x, &y);
     Point *point = new_point(x, y);
     int start_index = get_node_number(graph, point);
-    if (start_index == -1) {
-        printf("no such node in graph\n");
-    } else {
-        printf("enter coordinates(x,y) of destination node:");
-        scanf("%d %d", &x, &y);
-        point->x = x;
-        point->y = y;
-        int dest_index = get_node_number(graph, point);
-        if (dest_index == -1) {
-            printf("no such node in graph\n");
-        } else {
-            int *pred = shortest_path_from_this_node(graph, *(graph->nodes + start_index));
-            if(pred[dest_index] == dest_index)
-            {
-            	printf("there is no path between these two nodes\n");
-            }else{
-            	while(dest_index!=start_index){
-            		print_node(*(graph->nodes + dest_index));
-            		printf(" ");
-            		dest_index = pred[dest_index];
-            	}
-            	print_node(*(graph->nodes+start_index));
-            	printf("\n");
+    printf("enter coordinates(x,y) of destination node:");
+    scanf("%d %d", &x, &y);
+    point->x = x;
+    point->y = y;
+    int dest_index = get_node_number(graph, point);
+    if(start_index == dest_index){
+        print_node(*(graph->nodes + start_index));
+    }else{
+        int *pred = shortest_path_from_this_node(graph, start_index);
+        if(pred[dest_index] == dest_index)
+        {
+            printf("there is no path between these two nodes\n");
+        }else{
+            while(dest_index!=start_index){
+                print_node(*(graph->nodes + dest_index));
+                printf(" ");
+                dest_index = pred[dest_index];
             }
+            print_node(*(graph->nodes+start_index));
+            printf("\n");
         }
     }
 }
@@ -138,40 +130,19 @@ void check_if_reachable(Graph* graph) {
     scanf("%d %d", &x, &y);
     Point *point = new_point(x, y);
     int start_index = get_node_number(graph, point);
-    if (start_index == -1) {
-        printf("no such node in graph\n");
-    } else {
-        printf("enter coordinates(x,y) of destination node:");
-        scanf("%d %d", &x, &y);
-        point->x = x;
-        point->y = y;
-        int dest_index = get_node_number(graph, point);
-        if (dest_index == -1) {
-            printf("no such node in graph\n");
-        } else {
-            int result = breadth_first_search(graph, *(graph->nodes + start_index), *(graph->nodes + dest_index));
-            if(result){
-                printf("destination node is reachable from starting node\n");
-            }else{
-                printf("destination node is not reachable from starting node\n");
-            }
-        }
-    }
-}
-
-void bellman_ford(Graph* graph){
-    int x, y;
-    printf("enter coordinates(x,y) of starting node:");
+    printf("enter coordinates(x,y) of destination node:");
     scanf("%d %d", &x, &y);
-    Point *point = new_point(x, y);
-    int start_index = get_node_number(graph, point);
-    if (start_index == -1) {
-        printf("no such node in graph\n");
+    point->x = x;
+    point->y = y;
+    int dest_index = get_node_number(graph, point);
+    if(start_index == dest_index){
+        printf("destination node is reachable from starting node\n");
     }else{
-        int* dist = ford_bellman(graph, *(graph->nodes + start_index));
-        for(int i = 0; i<graph->nodes_count;i++) {
-            printf("%d ", dist[i]);
+        int result = breadth_first_search(graph, start_index, dest_index);
+        if(result){
+            printf("destination node is reachable from starting node\n");
+        }else{
+            printf("destination node is not reachable from starting node\n");
         }
-        free(dist);
     }
 }

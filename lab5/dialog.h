@@ -9,5 +9,5 @@ void remove_node(Graph* graph);
 void show_graph(Graph* graph);
 void find_shortest_path(Graph* graph);
 void check_if_reachable(Graph* graph);
-void bellman_ford(Graph* graph);
+void create_skeleton(Graph* graph);
 #endif
