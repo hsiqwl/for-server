@@ -87,6 +87,7 @@ int delete_node(Graph* graph, int node_index) {
     ptr = graph->nodes + node_index;
     clear_adj_list(&((*ptr)->head));
     free((*ptr)->point);
+    free(*ptr);
     for(int i = node_index; i < graph->nodes_count - 1;++i,++ptr){
         *ptr = *(ptr + 1);
         (*ptr)->node_index -=1;
@@ -173,7 +174,7 @@ int breadth_first_search(Graph* graph, int start, int dest) {
 
 void delete_graph(Graph** graph){
     Node** ptr = (*graph)->nodes;
-    for(int i=0;i<(*graph)->nodes_count;i++){
+    for(int i=0;i<(*graph)->nodes_count;i++,++ptr){
         clear_adj_list(&((*ptr)->head));
         free((*ptr)->point);
         free((*ptr));

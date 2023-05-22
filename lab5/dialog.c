@@ -17,6 +17,8 @@ void insert_node(Graph* graph)
     Node* new = new_node(point, node_type, graph->nodes_count);
     if(add_node(graph, new)){
         printf("there is such node already\n");
+        free(new->point);
+        free(new);
     }else{
         printf("ok\n");
     }
@@ -34,6 +36,7 @@ void insert_link(Graph* graph)
     point->x = x;
     point->y = y;
     int dest_index = get_node_number(graph, point);
+    free(point);
     if(add_link(graph, src_index, dest_index)){
         printf("cannot add a link\n");
     }else{
@@ -66,6 +69,7 @@ void remove_node(Graph* graph) {
     scanf("%d %d", &x, &y);
     Point *point = new_point(x, y);
     int node_index = get_node_number(graph, point);
+    free(point);
     if(delete_node(graph, node_index)){
        printf("no such node\n");
     }else{
@@ -105,6 +109,7 @@ void find_shortest_path(Graph* graph) {
     point->x = x;
     point->y = y;
     int dest_index = get_node_number(graph, point);
+    free(point);
     if(start_index == dest_index){
         print_node(*(graph->nodes + start_index));
     }else{
@@ -136,6 +141,7 @@ void check_if_reachable(Graph* graph) {
     point->x = x;
     point->y = y;
     int dest_index = get_node_number(graph, point);
+    free(point);
     if(start_index == dest_index){
         printf("destination node is reachable from starting node\n");
     }else{
