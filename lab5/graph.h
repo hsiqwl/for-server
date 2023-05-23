@@ -44,5 +44,6 @@ int change_nod_type(Graph* graph, int node_index, node_type new_type);
 int* shortest_path_from_this_node(Graph* graph, int start_index);
 int breadth_first_search(Graph* graph, int start,int dest);
 Graph* skeleton(Graph* graph);
+int* bfs(Graph* graph, int start);
 void delete_graph(Graph** graph);
 #endif

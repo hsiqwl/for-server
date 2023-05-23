@@ -125,10 +125,6 @@ int* shortest_path_from_this_node(Graph* graph, int start_index) {
     init_for_dijkstra(&dist, &visited, &prev_shortest,&heap, graph->nodes_count);
     int curr_node = start_index;
     dist[curr_node] = 0;
-    shift_up(heap, curr_node, dist);
-    int heap_size = graph->nodes_count;
-    curr_node = pop_min(heap, heap_size, dist);
-    heap_size--;
     int number_of_visited = 0;
     while (number_of_visited < graph->nodes_count) {
         adj_list* ptr = (*(graph->nodes + curr_node))->head;
@@ -137,14 +133,12 @@ int* shortest_path_from_this_node(Graph* graph, int start_index) {
             if (visited[next_node] == 0 && dist[next_node] > dist[curr_node] + 1) {
                 dist[next_node] = dist[curr_node] + 1;
                 prev_shortest[next_node] = curr_node;
-                shift_up(heap, next_node, dist);
             }
             ptr = ptr->next;
         }
         visited[curr_node] = 1;
         number_of_visited++;
-        curr_node = pop_min(heap, heap_size, dist);
-        heap_size--;
+        curr_node = get_index_of_min_unvisited(dist, visited, graph->nodes_count);
     }
     free(visited);
     free(dist);
@@ -195,7 +189,7 @@ void delete_graph(Graph** graph){
     free(*graph);
 }
 
-Graph* skeleton(Graph* graph){
+/*Graph* skeleton(Graph* graph){
     Graph* new = init();
     Node** ptr = graph->nodes;
     int* color = (int*)malloc(sizeof(int)*graph->nodes_count);
@@ -229,5 +223,85 @@ Graph* skeleton(Graph* graph){
     delete_stack(&s);
     free(color);
     return new;
+}*/
+
+int* bfs(Graph* graph, int start){
+    if(start==-1){
+        return 0;
+    }
+    int *visited = (int *)calloc(graph->nodes_count, sizeof(int));
+    int* pred = (int*)calloc(graph->nodes_count, sizeof(int));
+    for(int i = 0; i < graph->nodes_count;++i){
+        pred[i] = start;
+    }
+    queue *q = init_q();
+    push(q, start);
+    visited[start] = 1;
+    while (!is_empty(q)) {
+        int node_index = pop(q);
+        adj_list *ptr = (*(graph->nodes + node_index))->head;
+        while (ptr != NULL) {
+            if (!visited[ptr->node_index]) {
+                push(q, ptr->node_index);
+                visited[ptr->node_index] = 1;
+                pred[ptr->node_index] = node_index;
+            }
+            ptr = ptr->next;
+        }
+    }
+    clear_q(&q);
+    free(visited);
+    return pred;
 }
 
+Graph* skeleton(Graph* graph){
+    Graph* new = init();
+    Node** ptr = graph->nodes;
+    int* color = (int*)malloc(sizeof(int)*graph->nodes_count);
+    int* exits = (int*)malloc(sizeof(int)*graph->nodes_count);
+    int len = 0;
+    for(int i = 0; i < graph->nodes_count;++i,++ptr) {
+        Point *point = new_point((*ptr)->point->x, (*ptr)->point->y);
+        Node *node = new_node(point, (*ptr)->type, i);
+        add_node(new, node);
+        color[i] = i;
+        if((*ptr)->type == EXIT){
+            exits[len] = (*ptr)->node_index;
+            len++;
+        }
+    }
+    ptr = graph->nodes;
+    for(int i = 0; i < graph->nodes_count;++i,++ptr) {
+        if((*ptr)->type == ENTRY){
+            int* pred = bfs(graph, (*ptr)->node_index);
+            for(int j = 0; j<len;j++){
+                int end = exits[j];
+                while(end!=(*ptr)->node_index){
+                    if(!is_connected(end,pred[end], color)){
+                        add_link(new, pred[end], end);
+                        connect(pred[end], end, color, graph->nodes_count);
+                    }
+                }
+            }
+            free(pred);
+        }
+    }
+    ptr = new->nodes;
+    for(int i = 0; i < graph->nodes_count;++i,++ptr) {
+        adj_list* head = (*ptr)->head;
+        if(head==NULL){
+            adj_list* head_in_old = (*(graph->nodes + ((*ptr)->node_index)))->head;
+            while(head_in_old!=NULL){
+                if(!is_connected(head_in_old->node_index, (*ptr)->node_index, color)){
+                    connect(head_in_old->node_index, (*ptr)->node_index, color, graph->nodes_count);
+                    add_link(new,(*ptr)->node_index, head_in_old->node_index);
+                    break;
+                }
+                head_in_old = head_in_old->next;
+            }
+        }
+    }
+    free(exits);
+    free(color);
+    return new;
+}
