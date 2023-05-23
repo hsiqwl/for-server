@@ -15,6 +15,6 @@ void shift_up(int* heap, int pos,int* dist);
 void shift_down(int* heap, int pos, int curr_size, int* dist);
 void heap_insert(int* heap, int curr_size, int value, int* dist);
 int pop_min(int* heap, int curr_size, int* dist);
-int check_entries(const Graph* graph);
-int check_exits(const Graph* graph);
+int is_connected(int a, int b, int* color);
+void connect(int a, int b, int* color, int len);
 #endif

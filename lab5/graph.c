@@ -3,6 +3,7 @@
 #include "utils.h"
 #include "queue.h"
 #include <stdio.h>
+#include "stack.h"
 Graph* init() {
     Graph *new = (Graph*)malloc(sizeof(Graph));
     new->nodes = NULL;
@@ -193,3 +194,39 @@ void delete_graph(Graph** graph){
     free((*graph)->nodes);
     free(*graph);
 }
+
+Graph* skeleton(Graph* graph){
+    Graph* new = init();
+    Node** ptr = graph->nodes;
+    int* color = (int*)malloc(sizeof(int)*graph->nodes_count);
+    stack* s = init_stack();
+    for(int i = 0; i < graph->nodes_count;++i,++ptr){
+        Point* point = new_point((*ptr)->point->x, (*ptr)->point->y);
+        Node* node = new_node(point, (*ptr)->type, i);
+        add_node(new, node);
+        color[i] = i;
+        if((*ptr)->type == ENTRY){
+            push_top(s,(*ptr)->node_index);
+        }
+    }
+    while(!stack_empty(s)){
+        int curr_node = get_top(s);
+        adj_list* p = (*(graph->nodes + curr_node))->head;
+        while(p!=NULL){
+            if(!is_connected(curr_node, p->node_index, color)){
+                connect(curr_node, p->node_index, color, graph->nodes_count);
+                push_top(s,p->node_index);
+                add_link(new, curr_node, p->node_index);
+                break;
+            }else{
+                p = p->next;
+            }
+        }
+        if(p==NULL){
+            pop_top(s);
+        }
+    }
+    delete_stack(&s);
+    return new;
+}
+

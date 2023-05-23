@@ -83,42 +83,6 @@ void clear_adj_list(adj_list** head){
     }
 }
 
-/*int check_entries(const Graph* graph){
-    Node** ptr = graph->nodes;
-    for(int i=0;i<graph->nodes_count;++i,++ptr){
-        if((*ptr)->type == ENTRY && (*ptr)->next==NULL){
-            return 0;
-        }
-    }
-    return 1;
-}
-
-int check_exits(const Graph* graph){
-    Node** ptr = graph->nodes;
-    for(int i=0;i<graph->nodes_count;++i,++ptr) {
-        if((*ptr)->type != EXIT){
-            continue;
-        }else {
-            Node** new_ptr = graph->nodes;
-            int flag = 1;
-            for(int j = 0; j <graph->nodes_count;++j,++new_ptr){
-                Node* next_node = (*new_ptr)->next;
-                while(next_node!=NULL){
-                    if(next_node->node_index == i){
-                        flag = 0;
-                    }
-                    next_node = next_node->next;
-                }
-            }
-            if(flag){
-                return 1;
-            }else{
-                return 0;
-            }
-        }
-    }
-}*/
-
 void heap_swap(int a, int b, int* heap){
     int tmp = heap[a];
     heap[a] = heap[b];
@@ -162,4 +126,18 @@ int pop_min(int* heap, int curr_size, int* dist){
     curr_size--;
     shift_down(heap, 0, curr_size, dist);
     return min;
+}
+
+int is_connected(int a, int b, int* color){
+    return (color[a]==color[b]);
+}
+
+void connect(int a, int b, int* color, int len){
+    int color_a = color[a];
+    int color_b = color[b];
+    for(int i = 0; i < len;i++){
+        if(color[i] == color_a){
+            color[i] = color_b;
+        }
+    }
 }

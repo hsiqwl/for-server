@@ -153,3 +153,10 @@ void check_if_reachable(Graph* graph) {
         }
     }
 }
+
+void make_skeleton(Graph* graph){
+    Graph* new = skeleton(graph);
+    show_graph(new);
+    delete_graph(&new);
+}
+
