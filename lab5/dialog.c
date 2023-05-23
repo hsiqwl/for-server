@@ -183,3 +183,28 @@ void make_skeleton(Graph* graph){
     delete_graph(&new);
 }
 
+void import(Graph* graph){
+    FILE* fp = fopen("graph.txt", "r");
+    int i = 0;
+    while(!feof(fp)){
+        int x, y, node_type;
+        int n = fscanf(fp,"%d %d %d", &x,&y,&node_type);
+        if(n==3){
+            Point* point = new_point(x,y);
+            Node* node = new_node(point, node_type, i);
+            add_node(graph, node);
+            i++;
+        }
+    }
+    fclose(fp);
+    fp = fopen("edge.txt", "r");
+    while(!feof(fp)){
+        int src_index, dest_index;
+        int n = fscanf(fp,"%d %d", &src_index, &dest_index);
+        if(n==2){
+            add_link(graph, src_index, dest_index);
+        }
+    }
+    fclose(fp);
+}
+

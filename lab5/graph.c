@@ -227,6 +227,7 @@ Graph* skeleton(Graph* graph){
         }
     }
     delete_stack(&s);
+    free(color);
     return new;
 }
 
