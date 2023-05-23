@@ -3,11 +3,34 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "utils.h"
+#include "consts.h"
+
+int dialog(const char* msgs[], int len)
+{
+    char* err = "";
+    int command;
+    int n;
+    do
+    {
+        printf("%s\n",err);
+        err = "ERROR OCCURED,TRY AGAIN";
+        for(int i = 0;i<len;++i)
+        {
+            printf("%s\n",msgs[i]);
+        }
+        printf("Please make your choice->");
+        scanf("%d", &command);
+        printf("\n");
+    }while(command<0 || command>=len);
+    return command;
+}
+
+
 void insert_node(Graph* graph)
 {
     int x, y;
     printf("enter coordinates(x,y):");
-    scanf("%d-%d", &x,&y);
+    scanf("%d %d", &x,&y);
     Point* point = (Point*)malloc(sizeof(Point));
     point->x = x;
     point->y = y;
